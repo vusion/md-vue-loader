@@ -1,6 +1,6 @@
 {
   "name": "vue-markdown-html-loader",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "vue markdown html loader webpack",
   "main": "index.js",
   "scripts": {
