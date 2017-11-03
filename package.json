@@ -4,7 +4,9 @@
   "description": "vue markdown html loader webpack",
   "main": "index.js",
   "scripts": {
-    "test": "webpack-dev-server --content-base test/  --config test/webpack.config.js --open"
+    "test:custom": "webpack-dev-server --content-base test/  --config test/webpack.config.custom.js --open",
+    "test": "webpack-dev-server --content-base test/  --config test/webpack.config.js --open",
+    "test:build": "webpack --config test/webpack.config.js"
   },
   "keywords": [],
   "author": "zhangsanshi5566@gmail.com",
@@ -13,9 +15,11 @@
     "cheerio": "^0.20.0",
     "highlight.js": "^9.12.0",
     "loader-utils": "^1.1.0",
-    "markdown-it": "^8.4.0"
+    "markdown-it": "^8.4.0",
+    "virtual-file-loader": "0.0.4"
   },
   "devDependencies": {
+    "css-loader": "^0.28.7",
     "markdown-it-for-inline": "^0.1.1",
     "raw-loader": "^0.5.1",
     "vue": "^2.5.2",
