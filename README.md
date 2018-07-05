@@ -1,61 +1,74 @@
-# vue-markdown-html-loader
+# @vusion/md-vue-loader
 
-[![npm](https://img.shields.io/npm/v/vue-markdown-html-loader.svg?style=flat-square)](https://www.npmjs.com/package/vue-markdown-html-loader)
-![vue](https://img.shields.io/badge/vue-2.x-4fc08d.svg?colorA=2c3e50&style=flat-square)
+[![NPM Version][npm-img]][npm-url]
+[![Dependencies][david-img]][david-url]
+[![NPM Download][download-img]][download-url]
 
-> Convert Markdown file to Vue Component using markdown-it.inspire from [vue-markdown-loader](https://github.com/QingWei-Li/vue-markdown-loader) and [virtual-file-loader](https://github.com/renanhangai/virtual-file-loader) and [https://github.com/webpack/webpack/issues/5824](https://github.com/webpack/webpack/issues/5824).
+[npm-img]: http://img.shields.io/npm/v/@vusion/md-vue-loader.svg?style=flat-square
+[npm-url]: http://npmjs.org/package/@vusion/md-vue-loader
+[david-img]: http://img.shields.io/david/vusion/md-vue-loader.svg?style=flat-square
+[david-url]: https://david-dm.org/vusion/md-vue-loader
+[download-img]: https://img.shields.io/npm/dm/@vusion/md-vue-loader.svg?style=flat-square
+[download-url]: https://npmjs.org/package/@vusion/md-vue-loader
 
-## Installation
+Webpack loader for converting Markdown files to alive Vue components.
 
-```bash
-npm i vue-markdown-html-loader -D
+- Configurable [markdown-it](https://github.com/markdown-it/markdown-it) parser
+- Built-in **syntax highlighter** with [highlightjs](https://highlightjs.org)
+- Wrapper template
+- Hot reload
+
+## Example
+
+``` markdown
+
 ```
 
-## Feature
-- Hot reload
-- Write vue script
-- Code highlight
+## Install
 
+``` bash
+npm i -D @vusion/md-vue-loader
+```
 
-## Usage
-[Documentation: Using loaders](https://webpack.js.org/concepts/loaders/)
+## Config
+### Basic
 
-`webpack.config.js` file:
+Simply use `@vusion/md-vue-loader` to load `.md` files and chain it with your `vue-loader`.
 
-```javascript
+``` js
 module.exports = {
-  module: {
-    rules: [
-      {
-        test: /\.md$/,
-        use: [
-          {
-            loader: 'vue-loader',
-          },
-          {
-            loader: resolve(__dirname, "../index.js"),
-            options: {
-              wrapper: 'article',
-              markdownIt: {
-                  langPrefix: 'lang-',
-                  html: true,
-              },
-              markdownItPlugins: [
-                  [iterator, 'link_converter', 'link_open', (tokens, idx) => tokens[idx].tag = 'u-link'],
-                  [iterator, 'link_converter', 'link_close', (tokens, idx) => tokens[idx].tag = 'u-link'],
-              ],
-              preprocess: function (markdownIt, source) {
-                return `
-                  # added by preprocess 
-                  ${source}
-                `;
-              },
-            },
-          },
-        ],
-      }
-    ]
-  }
+    module: {
+        rules: [{
+            test: /\.md$/,
+            loader: 'vue-loader!@vusion/md-vue-loader',
+        }],
+    },
+};
+```
+
+Note that to get code highlighting to work, you need to:
+
+- include one of the highlight.js css files into your project, for example: `highlight.js/styles/github-gist.css`.
+- specify a lang in code block. ref: (creating and highlighting code blocks)[https://help.github.com/articles/creating-and-highlighting-code-blocks/].
+
+### With options
+
+``` js
+module.exports = {
+    module: {
+        rules: [{
+            test: /\.md$/,
+            use: [
+                'vue-loader',
+                {
+                    loader: '@vusion/md-vue-loader',
+                    options: {
+                        // your preferred options
+                    },
+                },
+            ],
+        }],
+    },
 };
 ```
 
@@ -63,72 +76,50 @@ module.exports = {
 
 ### wrapper
 
-You can customize wrapper tag no matter html element tag or vue component tag. Default is 'section'
+The wrapper of entire markdown content, can be HTML tag name or Vue component name.
 
-```js
+- Type: `string`
+- Default: `section`
+
+### markdown
+
+[markdown-it](https://github.com/markdown-it/markdown-it#init-with-presets-and-options) options.
+
+- Type: `Object`
+- Default:
+``` js
 {
-  test: /\.md$/,
-  loader: 'vue-markdown-html-loader',
-  options: {
-    wrapper: 'article',
-  }
+    html: true,
+    highlight(str, lang) {
+        if (lang && hljs.getLanguage(lang)) {
+            try {
+                return hljs.highlight(lang, str).value
+            } catch (__) {}
+        }
+        return ''
+    }
 }
 ```
 
-### markdownIt
+### plugins
 
-reference [markdown-it](https://github.com/markdown-it/markdown-it#init-with-presets-and-options)
-```javascript
-{
-  module: {
-    rules: [
-      {
-        test: /\.md$/,
-        loader: 'vue-markdown-html-loader',
-        options: {
-          wrapper: 'article',
-          markdownIt: {
-              langPrefix: 'lang-',
-              html: true,
-          },
-          markdownItPlugins: [
-            [iterator, 'link_converter', 'link_open', (tokens, idx) => tokens[idx].tag = 'u-link'],
-            [iterator, 'link_converter', 'link_close', (tokens, idx) => tokens[idx].tag = 'u-link'],
-          ],
-        }
-      }
-    ]
-  }
-}
-```
+[markdown-it](https://github.com/markdown-it/markdown-it#init-with-presets-and-options) plugins list.
 
-Or you can customize markdown-it
-```javascript
-var markdown = require('markdown-it')({
-  html: true,
-  breaks: true
-})
+- Type: `Array`
+- Default: `[]`
 
-markdown
-  .use(plugin1)
-  .use(plugin2, opts, ...)
-  .use(plugin3);
+### rules
 
-module.exports = {
-  module: {
-    rules: [
-      {
-        test: /\.md$/,
-        loader: 'vue-markdown-html-loader',
-        options: {
-          markdownIt: markdown,
-        }
-      }
-    ]
-  }
-};
-```
+- Type: `Array`
+- Default: `[]`
+
+## Reference
+
+- [vue-markdown-loader](https://github.com/QingWei-Li/vue-markdown-loader)
+- [vue-md-loader](https://github.com/wxsms/vue-md-loader)
+- [virtual-file-loader](https://github.com/renanhangai/virtual-file-loader)
+- [https://github.com/webpack/webpack/issues/5824](https://github.com/webpack/webpack/issues/5824)
 
 ## License
-MIT
 
+[MIT](LICENSE)

@@ -1,2 +1,10 @@
-node_modules
+.DS_Store
+node_modules/
+npm-debug.log
+tests/**/dest/
+__test_tmp_*
+__tmp_*
+.idea
 .vscode
+yarn.lock
+package-lock.json

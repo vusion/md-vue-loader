@@ -154,12 +154,10 @@ function createPatchFn(obj, name, fn) {
 	};
 }
 
-module.exports = {
-    addFile(fs, path, content, cb) {
-        add(fs, {
-            path,
-			content: Buffer.from(content),
-        });
-        cb && cb();
-    },
+exports.addFile = function (fs, path, content, cb) {
+	add(fs, {
+		path,
+		content: Buffer.from(content),
+	});
+	cb && cb();
 };

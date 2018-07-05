@@ -5,8 +5,8 @@ const loaderUtils = require('loader-utils');
 const hljs = require('highlight.js');
 const cheerio = require('cheerio');
 const Token = require('markdown-it/lib/token');
-const Util = require('./util.js');
-const Virtual = require('./virtual.js');
+const hash = require('hash-sum');
+const Virtual = require('./virtual');
 
 let parser = null;
 let loader = null;
@@ -116,9 +116,9 @@ const renderVueTemplate = function (html) {
 };
 
 const getUniqueName = function name(content, checkSame) {
-    let autoGenerateComponentName = Util.md5(content).substring(0, 6);
+    let autoGenerateComponentName = hash(content);
     while(checkSame(autoGenerateComponentName)) {
-        autoGenerateComponentName = Util.md5(autoGenerateComponentName).substring(0, 6);
+        autoGenerateComponentName = hash(autoGenerateComponentName);
     }
     return autoGenerateComponentName;
 };
@@ -127,7 +127,7 @@ const generateVirtualFile = function generateCacheVUEFile(fileName, content) {
     Virtual.addFile(loader.fs, fileName, content);
 };
 
-const loaderVUEComponents = function (source, dirname, basename) {
+const loaderVueComponents = function (source, dirname, basename) {
     const reg = /```(.+?)\r?\n([\s\S]+?)\r?\n```/g;
     const loader = this;
     source = source.replace(reg, function (m, lang, content) {
@@ -164,7 +164,7 @@ module.exports = function compiler(content) {
     if (preprocess) {
         content = preprocess.call(this, parser, content);
     }
-    content = loaderVUEComponents.call(this, content, path.dirname(this.resourcePath), path.basename(this.resourcePath));
+    content = loaderVueComponents.call(this, content, path.dirname(this.resourcePath), path.basename(this.resourcePath));
     content = content.replace(/@/g, '__at__');
     content = parser.render(content).replace(/__at__/g, '@');
     result = renderVueTemplate(content, wrapper);
