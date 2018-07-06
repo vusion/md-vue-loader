@@ -154,7 +154,7 @@ function createPatchFn(obj, name, fn) {
 	};
 }
 
-exports.addFile = function (fs, path, content, cb) {
+exports.createFile = function (fs, path, content, cb) {
 	add(fs, {
 		path,
 		content: Buffer.from(content),
