@@ -15,14 +15,13 @@
   "bugs": {
     "url": "http://github.com/vusion/md-vue-loader/issues"
   },
-  "keywords": [],
-  "license": "MIT",
   "keywords": [
     "markdown",
     "vue",
     "webpack",
     "loader"
   ],
+  "license": "MIT",
   "tags": [
     "markdown",
     "vue",
