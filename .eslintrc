@@ -1,0 +1,8 @@
+{
+    "extends": "vusion",
+    "env": {
+        "commonjs": true,
+        "node": true,
+        "mocha": true
+    }
+}

@@ -19,7 +19,7 @@ const defaultMarkdownOptions = {
                 return `<pre class='hljs ${this.langPrefix}${rawLang}'><code>${result}</code></pre>`;
             } catch (e) {}
         }
-        const result = markdown.utils.escapeHtml(str);
+        const result = MarkdownIt.utils.escapeHtml(str);
         return `<pre class='hljs'><code>${result}</code></pre>`;
     },
 };
@@ -28,18 +28,18 @@ const defaultMarkdownOptions = {
 // Apply `v-pre` to `<pre>` and `<code>` tags
 const ensureVPre = function (markdown) {
     if (markdown && markdown.renderer && markdown.renderer.rules) {
-        let rules = ['code_inline', 'code_block', 'fence']
-        let rendererRules = markdown.renderer.rules
-        rules.forEach(function (rule) {
+        const rules = ['code_inline', 'code_block', 'fence'];
+        const rendererRules = markdown.renderer.rules;
+        rules.forEach((rule) => {
             if (rendererRules.hasOwnProperty(rule) && typeof rendererRules[rule] === 'function') {
-                let saved = rendererRules[rule]
-                rendererRules[rule] = function () {
-                    return saved.apply(this, arguments).replace(/(<pre|<code)/g, '$1 v-pre')
-                }
+                const saved = rendererRules[rule];
+                rendererRules[rule] = function (...args) {
+                    return saved.apply(this, args).replace(/(<pre|<code)/g, '$1 v-pre');
+                };
             }
         });
     }
-}
+};
 
 class Parser {
     constructor(options, loader) {
@@ -55,7 +55,7 @@ class Parser {
             plugins: [],
             preprocess: null,
             postprocess: null,
-        }
+        };
 
         // merge user options into defaults
         this.options = Object.assign({}, defaultOptions, options);
@@ -66,23 +66,21 @@ class Parser {
         ensureVPre(this.markdown);
         // apply rules
         if (this.options.rules) {
-            let rendererRules = this.markdown.renderer.rules
-            let userRules = this.options.rules
-            for (let key in userRules) {
+            const rendererRules = this.markdown.renderer.rules;
+            const userRules = this.options.rules;
+            for (const key in userRules) {
                 if (userRules.hasOwnProperty(key) && typeof userRules[key] === 'function') {
-                    rendererRules[key] = userRules[key]
+                    rendererRules[key] = userRules[key];
                 }
             }
         }
         // install plugins
         if (this.options.plugins && this.options.plugins.length) {
             this.options.plugins.forEach((plugin) => {
-                if (Array.isArray(plugin)) {
-                    if (plugin[0])
-                        this.markdown.use.apply(this.markdown, plugin)
-                } else if (plugin) {
-                    this.markdown.use(plugin)
-                }
+                if (Array.isArray(plugin))
+                    this.markdown.use(...plugin);
+                else if (plugin)
+                    this.markdown.use(plugin);
             });
         }
 
@@ -96,7 +94,7 @@ class Parser {
 
     createFile(filename, content) {
         vfs.createFile(this.loader.fs, filename, content);
-    };
+    }
 
     fetchComponents(source, filepath) {
         const dirname = path.dirname(filepath);
@@ -109,7 +107,7 @@ class Parser {
             if (lang === 'vue') {
                 const index = Object.keys(this.components).length;
                 const uniqueName = 'C' + hashSum(filepath + '-' + content);
-                const prefix = `./${basename.replace(/\./g ,'_')}-${index}-`;
+                const prefix = `./${basename.replace(/\./g, '_')}-${index}-`;
                 const filename = path.join(dirname, prefix + uniqueName + '.vue').replace(/\\/g, '/');
                 this.components[uniqueName] = filename;
                 this.createFile(filename, content);
@@ -130,7 +128,7 @@ class Parser {
         const $ = cheerio.load(html, {
             decodeEntities: false,
             lowerCaseAttributeNames: false,
-            lowerCaseTags: false
+            lowerCaseTags: false,
         });
 
         const renderScript = () => {

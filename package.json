@@ -1,27 +1,45 @@
 {
-  "name": "vue-markdown-html-loader",
+  "name": "@vusion/md-vue-loader",
   "version": "0.1.0",
-  "description": "vue markdown html loader webpack",
-  "main": "index.js",
+  "author": "zhangsanshi5566@gmail.com",
+  "description": "Webpack loader for converting Markdown files to alive Vue components.",
   "scripts": {
+    "precommit": "bash node_modules/vusion-hooks/pre-commit",
     "test:custom": "webpack-dev-server --content-base test/  --config test/webpack.config.custom.js --open",
     "test:plugin": "webpack-dev-server --content-base test/  --config test/webpack.config.plugin.js --open",
     "test": "webpack-dev-server --content-base test/  --config test/webpack.config.js --open",
     "test:build": "webpack --config test/webpack.config.js"
   },
+  "main": "index.js",
+  "repository": "vusion/md-vue-loader",
+  "bugs": {
+    "url": "http://github.com/vusion/md-vue-loader/issues"
+  },
   "keywords": [],
-  "author": "zhangsanshi5566@gmail.com",
   "license": "MIT",
+  "keywords": [
+    "markdown",
+    "vue",
+    "webpack",
+    "loader"
+  ],
+  "tags": [
+    "markdown",
+    "vue",
+    "webpack",
+    "loader"
+  ],
   "dependencies": {
     "cheerio": "^0.20.0",
     "hash-sum": "^1.0.2",
     "highlight.js": "^9.12.0",
     "loader-utils": "^1.1.0",
-    "markdown-it": "^8.4.0",
-    "virtual-file-loader": "0.0.4"
+    "markdown-it": "^8.4.0"
   },
   "devDependencies": {
     "css-loader": "^0.28.7",
+    "eslint": "^4.19.1",
+    "eslint-config-vusion": "^2.0.3",
     "markdown-it-for-inline": "^0.1.1",
     "raw-loader": "^0.5.1",
     "vue": "^2.5.2",

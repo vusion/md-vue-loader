@@ -1,163 +1,163 @@
 /**
- * under code all from
+ * all above code from
  * https://github.com/renanhangai/virtual-file-loader/blob/master/src/fs-patch.js
  */
 
-var path = require('path');
-var loaderUtils = require('loader-utils');
+const path = require('path');
 
-var NS = __filename;
+const NS = __filename;
 
 /**
  * Patch the file system
  */
 function patch(fs) {
-	if (fs[NS]) return;
+    if (fs[NS])
+        return;
 
-	var virtualFS = {
-		files: {},
+    const virtualFS = {
+        files: {},
+        add(options) {
+            const file = path.resolve(options.path);
+            if (virtualFS.files[file] && virtualFS.files[file].content.equals(options.content)) {
+                return;
+            }
+            virtualFS.files[file] = {
+                path: file,
+                content: options.content,
+            };
+        },
+    };
+    fs[NS] = virtualFS;
 
-		add: function add(options) {
-			var file = path.resolve(options.path);
-			if (virtualFS.files[file] && virtualFS.files[file].content.equals(options.content)) {
-				return;
-			}
-			virtualFS.files[file] = {
-				path: file,
-				content: options.content,
-			};
-		}
-	};
-	fs[NS] = virtualFS;
+    createPatchFn(fs, 'readFile', function (orig, args, file, encoding, cb) {
+        const rfile = path.resolve(file);
+        const vfile = virtualFS.files[rfile];
+        if (vfile) {
+            if (typeof encoding === 'function') {
+                cb = encoding;
+                encoding = null;
+            }
 
-	createPatchFn(fs, 'readFile', function (orig, args, file, encoding, cb) {
-		var rfile = path.resolve(file);
-		var vfile = virtualFS.files[rfile];
-		if (vfile) {
-			if (typeof encoding === 'function') {
-				cb = encoding;
-				encoding = null;
-			}
+            let content = vfile.content;
+            if (encoding !== null)
+                content = content.toString(encoding);
 
-			var content = vfile.content;
-			if (encoding != null) content = content.toString(encoding);
+            cb(null, content);
+            return;
+        }
+        return orig.apply(this, args);
+    });
+    createPatchFn(fs, 'readFileSync', function (orig, args, file, encoding) {
+        const rfile = path.resolve(file);
+        const vfile = virtualFS.files[rfile];
+        if (vfile) {
+            let content = vfile.content;
+            if (encoding !== null)
+                content = content.toString(encoding);
+            return content;
+        }
+        return orig.apply(this, args);
+    });
 
-			cb(null, content);
-			return;
-		}
-		return orig.apply(this, args);
-	});
-	createPatchFn(fs, 'readFileSync', function (orig, args, file, encoding) {
-		var rfile = path.resolve(file);
-		var vfile = virtualFS.files[rfile];
-		if (vfile) {
-			var content = vfile.content;
-			if (encoding != null) content = content.toString(encoding);
-			return content;
-		}
-		return orig.apply(this, args);
-	});
-
-	createPatchFn(fs, 'stat', function (orig, args, p, cb) {
-		var rp = path.resolve(p);
-		var vfile = virtualFS.files[rp];
-		if (vfile) {
-			var vstat = {
-				dev: 8675309,
-				nlink: 1,
-				uid: 501,
-				gid: 20,
-				rdev: 0,
-				blksize: 4096,
-				ino: 44700000,
-				mode: 33188,
-				size: vfile.content.length,
-				isFile: function isFile() {
-					return true;
-				},
-				isDirectory: function isDirectory() {
-					return false;
-				},
-				isBlockDevice: function isBlockDevice() {
-					return false;
-				},
-				isCharacterDevice: function isCharacterDevice() {
-					return false;
-				},
-				isSymbolicLink: function isSymbolicLink() {
-					return false;
-				},
-				isFIFO: function isFIFO() {
-					return false;
-				},
-				isSocket: function isSocket() {
-					return false;
-				}
-			};
-			cb(null, vstat);
-			return;
-		}
-		return orig.apply(this, args);
-	});
-	createPatchFn(fs, 'statSync', function (orig, args, p) {
-		var rp = path.resolve(p);
-		var vfile = virtualFS.files[rp];
-		if (vfile) {
-			var vstat = {
-				dev: 8675309,
-				nlink: 1,
-				uid: 501,
-				gid: 20,
-				rdev: 0,
-				blksize: 4096,
-				ino: 44700000,
-				mode: 33188,
-				size: vfile.content.length,
-				isFile: function isFile() {
-					return true;
-				},
-				isDirectory: function isDirectory() {
-					return false;
-				},
-				isBlockDevice: function isBlockDevice() {
-					return false;
-				},
-				isCharacterDevice: function isCharacterDevice() {
-					return false;
-				},
-				isSymbolicLink: function isSymbolicLink() {
-					return false;
-				},
-				isFIFO: function isFIFO() {
-					return false;
-				},
-				isSocket: function isSocket() {
-					return false;
-				}
-			};
-			return vstat;
-		}
-		return orig.apply(this, args);
-	});
+    createPatchFn(fs, 'stat', function (orig, args, p, cb) {
+        const rp = path.resolve(p);
+        const vfile = virtualFS.files[rp];
+        if (vfile) {
+            const vstat = {
+                dev: 8675309,
+                nlink: 1,
+                uid: 501,
+                gid: 20,
+                rdev: 0,
+                blksize: 4096,
+                ino: 44700000,
+                mode: 33188,
+                size: vfile.content.length,
+                isFile: function isFile() {
+                    return true;
+                },
+                isDirectory: function isDirectory() {
+                    return false;
+                },
+                isBlockDevice: function isBlockDevice() {
+                    return false;
+                },
+                isCharacterDevice: function isCharacterDevice() {
+                    return false;
+                },
+                isSymbolicLink: function isSymbolicLink() {
+                    return false;
+                },
+                isFIFO: function isFIFO() {
+                    return false;
+                },
+                isSocket: function isSocket() {
+                    return false;
+                },
+            };
+            cb(null, vstat);
+            return;
+        }
+        return orig.apply(this, args);
+    });
+    createPatchFn(fs, 'statSync', function (orig, args, p) {
+        const rp = path.resolve(p);
+        const vfile = virtualFS.files[rp];
+        if (vfile) {
+            const vstat = {
+                dev: 8675309,
+                nlink: 1,
+                uid: 501,
+                gid: 20,
+                rdev: 0,
+                blksize: 4096,
+                ino: 44700000,
+                mode: 33188,
+                size: vfile.content.length,
+                isFile: function isFile() {
+                    return true;
+                },
+                isDirectory: function isDirectory() {
+                    return false;
+                },
+                isBlockDevice: function isBlockDevice() {
+                    return false;
+                },
+                isCharacterDevice: function isCharacterDevice() {
+                    return false;
+                },
+                isSymbolicLink: function isSymbolicLink() {
+                    return false;
+                },
+                isFIFO: function isFIFO() {
+                    return false;
+                },
+                isSocket: function isSocket() {
+                    return false;
+                },
+            };
+            return vstat;
+        }
+        return orig.apply(this, args);
+    });
 }
 
 function add(fs, options) {
-	patch(fs);
-	fs[NS].add(options);
+    patch(fs);
+    fs[NS].add(options);
 }
 
 function createPatchFn(obj, name, fn) {
-	var origin = obj[name];
-	obj[name] = function () {
-		var args = Array.prototype.slice.call(arguments);
-		return fn.apply(this, [origin, args].concat(args));
-	};
+    const origin = obj[name];
+    obj[name] = function (...args) {
+        return fn.apply(this, [origin, args].concat(args));
+    };
 }
 
 exports.createFile = function (fs, path, content, cb) {
-	add(fs, {
-		path,
-		content: Buffer.from(content),
-	});
-	cb && cb();
+    add(fs, {
+        path,
+        content: Buffer.from(content),
+    });
+    cb && cb();
 };
