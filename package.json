@@ -1,6 +1,6 @@
 {
   "name": "@vusion/md-vue-loader",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "zhangsanshi5566@gmail.com",
   "description": "Webpack loader for converting Markdown files to alive Vue components.",
   "scripts": {
