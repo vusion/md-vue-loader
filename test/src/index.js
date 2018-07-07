@@ -1,5 +1,5 @@
-import app from './test.md';
-import app2 from './test2.md';
+import app from './advanced.md';
+// import app2 from './test2.md';
 import Vue from 'vue';
 new Vue(app).$mount('#preview1');
-new Vue(app2).$mount('#preview2');
+// new Vue(app2).$mount('#preview2');

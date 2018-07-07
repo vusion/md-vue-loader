@@ -7,6 +7,7 @@
     "precommit": "bash node_modules/vusion-hooks/pre-commit",
     "test:custom": "webpack-dev-server --content-base test/  --config test/webpack.config.custom.js --open",
     "test:plugin": "webpack-dev-server --content-base test/  --config test/webpack.config.plugin.js --open",
+    "test:advanced": "webpack-dev-server --content-base test/  --config test/webpack.config.advanced.js --open",
     "test": "webpack-dev-server --content-base test/  --config test/webpack.config.js --open",
     "test:build": "webpack --config test/webpack.config.js"
   },

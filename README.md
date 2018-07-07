@@ -15,13 +15,40 @@ Webpack loader for converting Markdown files to alive Vue components.
 
 - Configurable [markdown-it](https://github.com/markdown-it/markdown-it) parser
 - Built-in **syntax highlighter** with [highlightjs](https://highlightjs.org)
-- Wrapper template
+- Live vue/html code blocks
 - Hot reload
 
 ## Example
 
-``` markdown
+Support two kinds of code blocks to live:
 
+``` html
+<u-button>Button</u-button>
+<u-input></u-input>
+```
+
+``` vue
+<template>
+<div :class="$style.root">
+<u-button>Button</u-button>
+<u-input v-model="value"></u-input>
+</div>
+</template>
+<script>
+export default {
+    data() {
+        return {
+            value: 'Hello world!',
+        };
+    },
+};
+</script>
+<style module>
+.root {
+    width: 200px;
+    background: #eee;
+}
+</style>
 ```
 
 ## Install
@@ -30,7 +57,7 @@ Webpack loader for converting Markdown files to alive Vue components.
 npm i -D @vusion/md-vue-loader
 ```
 
-## Config
+## Usage
 ### Basic
 
 Simply use `@vusion/md-vue-loader` to load `.md` files and chain it with your `vue-loader`.
@@ -72,18 +99,51 @@ module.exports = {
 };
 ```
 
+### Resource Query
+
+Remember that you can override options in markdown files query.
+
+``` js
+const routes = [
+    { path: 'article', component: import('./article.md?live=false') },
+]
+```
+
 ## Options
+
+### live
+
+- Type: `boolean`
+- Default: `true`
+
+Enable/Disable live detecting and assembling vue/html code blocks.
+
+### liveProcess
+
+Process after fetching live components from code blocks
+
+- Type: `Function`
+- Default: `null`
+
+For example:
+
+``` javascript
+liveProcess(live, code) {
+  // do anything
+  return `<div>${live}</div>` + '\n\n' + code;
+}
+```
 
 ### wrapper
 
 The wrapper of entire markdown content, can be HTML tag name or Vue component name.
 
 - Type: `string`
-- Default: `section`
+- Default: `'section'`
 
 ### markdown
 
-[markdown-it](https://github.com/markdown-it/markdown-it#init-with-presets-and-options) options.
+[markdown-it](https://github.com/markdown-it/markdown-it) options.
 
 - Type: `Object`
 - Default:
@@ -110,15 +170,62 @@ The wrapper of entire markdown content, can be HTML tag name or Vue component na
 
 ### plugins
 
-[markdown-it](https://github.com/markdown-it/markdown-it#init-with-presets-and-options) plugins list.
+[markdown-it](https://github.com/markdown-it/markdown-it) plugins list.
 
 - Type: `Array`
 - Default: `[]`
 
 ### rules
 
-- Type: `Array`
-- Default: `[]`
+[markdown-it](https://github.com/markdown-it/markdown-it) renderer rules.
+
+- Type: `Object`
+- Default: `{}`
+
+For example:
+
+``` javascript
+rules: {
+  'table_open': () => '<div class="table-responsive"><table class="table">',
+  'table_close': () => '</table></div>'
+}
+```
+
+### preprocess
+
+Process before converting.
+
+- Type: `Function`
+- Default: `null`
+
+For example:
+
+``` javascript
+preprocess(source) {
+  // do anything
+  return source
+}
+```
+
+
+### postprocess
+
+Process after converting.
+
+- Type: `Function`
+- Default: `null`
+
+For example:
+
+``` javascript
+postprocess(result) {
+  // do anything
+  return result
+}
+```
+
+- Type: `Function`
+- Default: `null`
 
 ## Reference
 
