@@ -179,7 +179,7 @@ ${output.script}
         if (this.options.live)
             source = this.fetchComponents(source, filepath);
 
-        const html = this.markdown.render(source.replace(/@/g, '__AT__')).replace(/__AT__/g, '@');
+        const html = this.markdown.render(source);
         let result = this.renderVue(html);
         if (this.options.postprocess)
             result = this.options.postprocess.call(this, result);

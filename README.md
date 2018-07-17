@@ -30,8 +30,8 @@ Support two kinds of code blocks to live:
 ``` vue
 <template>
 <div :class="$style.root">
-<u-button>Button</u-button>
-<u-input v-model="value"></u-input>
+    <u-button>Button</u-button>
+    <u-input v-model="value"></u-input>
 </div>
 </template>
 <script>
