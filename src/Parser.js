@@ -112,6 +112,7 @@ class Parser {
 
             let live = '';
             if (lang === 'vue') {
+                content = content + '\n';
                 const index = Object.keys(this.components).length;
                 const uniqueName = 'c-' + hashSum(filepath + '-' + content);
                 const prefix = `./${basename.replace(/\./g, '_')}-${index}-`;
