@@ -1,10 +1,9 @@
 const path = require('path');
 const MarkdownIt = require('markdown-it');
 const hljs = require('highlight.js');
-const hashSum = require('hash-sum');
 const vfs = require('./virtual');
-const cheerio = require('cheerio');
 const loaderUtils = require('loader-utils');
+const hashSum = require('hash-sum');
 
 // https://github.com/QingWei-Li/vue-markdown-loader/blob/master/lib/markdown-compiler.js
 // Apply `v-pre` to `<pre>` and `<code>` tags
@@ -31,8 +30,11 @@ class Parser {
         // default options
         const defaultOptions = {
             live: true,
-            liveProcess(live, code) {
-                return live + '\n\n' + code;
+            codeProcess(live, code) {
+                if (live)
+                    return `<u-code-example><div>${live}</div><div slot="code">${code}</div></u-code-example>\n\n`;
+                else
+                    return code;
             },
             wrapper: 'section',
             markdown: {},
@@ -45,20 +47,27 @@ class Parser {
         const defaultMarkdownOptions = {
             html: true,
             langPrefix: 'lang-',
-            highlight: (str, rawLang) => {
+            highlight: (content, rawLang) => {
+                content = content.trim();
+                rawLang = rawLang.trim();
+
                 let lang = rawLang;
-                if (rawLang === 'vue') {
+                if (rawLang === 'vue')
                     lang = 'html';
-                }
+
+                let code = '';
                 if (lang && hljs.getLanguage(lang)) {
                     try {
-                        const result = hljs.highlight(lang, str).value;
-                        return `<pre class='hljs ${this.markdown.options.langPrefix}${rawLang}'><code>${result}</code></pre>`;
+                        const result = hljs.highlight(lang, content).value;
+                        code = `<pre class="hljs ${markdown.options.langPrefix}${rawLang}"><code>${result}</code></pre>\n`;
                     } catch (e) {}
+                } else {
+                    const result = markdown.utils.escapeHtml(content);
+                    code = `<pre class="hljs"><code>${result}</code></pre>\n`;
                 }
 
-                const result = this.markdown.utils.escapeHtml(str);
-                return `<pre class='hljs'><code>${result}</code></pre>`;
+                const live = this.options.live ? this.liveComponent(rawLang, content) : '';
+                return this.options.codeProcess(live, code);
             },
         };
 
@@ -66,12 +75,19 @@ class Parser {
         this.options = Object.assign({}, defaultOptions, options);
         this.options.markdown = Object.assign({}, defaultMarkdownOptions, options.markdown);
         // init MarkdownIt instance
-        this.markdown = new MarkdownIt(this.options.markdown);
+        const markdown = this.markdown = new MarkdownIt(this.options.markdown);
+        markdown.renderer.rules.fence = function (tokens, idx, options) {
+            const token = tokens[idx];
+            const info = token.info ? markdown.utils.unescapeAll(token.info).trim() : '';
+            const langName = info.split(/\s+/g)[0];
+            return options.highlight(token.content, langName);
+        };
+
         // v-pre must be set
-        ensureVPre(this.markdown);
+        ensureVPre(markdown);
         // apply rules
         if (this.options.rules) {
-            const rendererRules = this.markdown.renderer.rules;
+            const rendererRules = markdown.renderer.rules;
             const userRules = this.options.rules;
             for (const key in userRules) {
                 if (userRules.hasOwnProperty(key) && typeof userRules[key] === 'function') {
@@ -83,9 +99,9 @@ class Parser {
         if (this.options.plugins && this.options.plugins.length) {
             this.options.plugins.forEach((plugin) => {
                 if (Array.isArray(plugin))
-                    this.markdown.use(...plugin);
+                    markdown.use(...plugin);
                 else if (plugin)
-                    this.markdown.use(plugin);
+                    markdown.use(plugin);
             });
         }
 
@@ -101,90 +117,70 @@ class Parser {
         vfs.createFile(this.loader.fs, filename, content);
     }
 
-    fetchComponents(source, filepath) {
+    liveComponent(lang, content) {
+        const filepath = this.loader.resourcePath;
         const dirname = path.dirname(filepath);
         const basename = path.basename(filepath);
+        // console.log(filepath);
 
-        const reg = /```(.+?)\r?\n([\s\S]+?)\r?\n```/g;
-        source = source.replace(reg, (m, lang, content) => {
-            lang = lang.trim();
-            content = content.trim();
+        let live = '';
+        if (lang === 'vue') {
+            content += '\n';
 
-            let live = '';
-            if (lang === 'vue') {
-                content = content + '\n';
-                const index = Object.keys(this.components).length;
-                const uniqueName = 'c-' + hashSum(filepath + '-' + content);
-                const prefix = `./${basename.replace(/\./g, '_')}-${index}-`;
-                const filename = path.join(dirname, prefix + uniqueName + '.vue').replace(/\\/g, '/');
-                this.components[uniqueName] = filename;
-                this.createFile(filename, content);
-                // inject tag
-                live = `<${uniqueName} />`;
-            } else if (lang === 'html')
-                live = content;
+            const index = Object.keys(this.components).length;
+            const uniqueName = `c-${hashSum(filepath + '-' + content)}-${index}`;
+            const prefix = basename.replace(/\./g, '-') + '-';
+            const filename = path.join(dirname, prefix + uniqueName + '.vue').replace(/\\/g, '/');
+            this.components[uniqueName] = filename;
 
-            if (live)
-                return this.options.liveProcess(live, m);
-            else
-                return m;
-        });
+            console.log(filename);
+            this.createFile(filename, content);
+            // inject tag
+            live = `<${uniqueName} />`;
+        } else if (lang === 'html')
+            live = content;
 
-        return source;
+        return live;
     }
 
     renderVue(html) {
-        const $ = cheerio.load(html, {
-            decodeEntities: false,
-            lowerCaseAttributeNames: false,
-            lowerCaseTags: false,
-        });
+        html = `<template><${this.options.wrapper}>${html}</${this.options.wrapper}></template>\n`;
 
-        const renderScript = () => {
+        let script = '';
+
+        if (Object.keys(this.components).length) {
             let importsString = '';
+
             let componentsString = '{\n';
             Object.keys(this.components).forEach((key, index) => {
                 importsString += `import Component${index} from ${loaderUtils.stringifyRequest(this.loader, this.components[key])};\n`;
                 componentsString += `'${key}': Component${index},\n`;
             });
             componentsString += '},';
-            return `
-                <script>
-                    ${importsString}
-                    export default {
-                        components: ${componentsString}
-                    }
-                </script>
+
+            script = `
+<script>
+    ${importsString}
+    export default {
+        components: ${componentsString}
+    }
+</script>
             `;
-        };
+        }
 
-        const output = {
-            style: $.html('style'),
-            script: !Object.keys(this.components).length ? '' : renderScript(this.components),
-        };
-        $('style').remove();
-        $('script').remove();
-
-        return `
-<template><${this.options.wrapper}>${$.html()}</${this.options.wrapper}></template>
-${output.style}
-${output.script}
-`;
+        return html + script;
     }
 
     parse(source) {
-        const filepath = this.loader.resourcePath;
         this.reset();
         if (this.options.preprocess)
             source = this.options.preprocess.call(this, source);
-        if (this.options.live)
-            source = this.fetchComponents(source, filepath);
 
         const html = this.markdown.render(source);
         let result = this.renderVue(html);
+
         if (this.options.postprocess)
             result = this.options.postprocess.call(this, result);
-
         return result;
     }
 }
