@@ -121,7 +121,6 @@ class Parser {
         const filepath = this.loader.resourcePath;
         const dirname = path.dirname(filepath);
         const basename = path.basename(filepath);
-        // console.log(filepath);
 
         let live = '';
         if (lang === 'vue') {
@@ -133,7 +132,6 @@ class Parser {
             const filename = path.join(dirname, prefix + uniqueName + '.vue').replace(/\\/g, '/');
             this.components[uniqueName] = filename;
 
-            console.log(filename);
             this.createFile(filename, content);
             // inject tag
             live = `<${uniqueName} />`;
