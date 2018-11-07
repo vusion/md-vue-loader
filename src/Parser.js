@@ -26,14 +26,23 @@ class Parser {
     constructor(options, loader) {
         options = options || {};
         this.loader = loader;
+        const relativePath = path.relative(process.cwd(), loader.resourcePath).replace(/\\/g, '/').replace(/^(\.\.\/)+/, '');
 
         // default options
         const defaultOptions = {
             live: true,
-            codeProcess(live, code) {
-                if (live)
-                    return `<u-code-example><div>${live}</div><div slot="code">${code}</div></u-code-example>\n\n`;
-                else
+            showCodeLineCount: 5,
+            codeProcess(live, code, content, lang) {
+                if (live) {
+                    const lineCount = content.split('\n').length;
+                    return `<u-code-example
+    :show-code="${lineCount <= this.options.showCodeLineCount}"
+    :disable-detail="${lang === 'html'}"
+    file-path="${relativePath}">
+    <div>${live}</div>
+    <div slot="code">${code}</div>
+</u-code-example>\n\n`;
+                } else
                     return code;
             },
             wrapper: 'section',
@@ -47,27 +56,27 @@ class Parser {
         const defaultMarkdownOptions = {
             html: true,
             langPrefix: 'lang-',
-            highlight: (content, rawLang) => {
+            highlight: (content, lang) => {
                 content = content.trim();
-                rawLang = rawLang.trim();
+                lang = lang.trim();
 
-                let lang = rawLang;
-                if (rawLang === 'vue')
-                    lang = 'html';
+                let hlLang = lang;
+                if (lang === 'vue')
+                    hlLang = 'html';
 
                 let code = '';
-                if (lang && hljs.getLanguage(lang)) {
+                if (hlLang && hljs.getLanguage(hlLang)) {
                     try {
-                        const result = hljs.highlight(lang, content).value;
-                        code = `<pre class="hljs ${markdown.options.langPrefix}${rawLang}"><code>${result}</code></pre>\n`;
+                        const result = hljs.highlight(hlLang, content).value;
+                        code = `<pre class="hljs ${markdown.options.langPrefix}${lang}"><code>${result}</code></pre>\n`;
                     } catch (e) {}
                 } else {
                     const result = markdown.utils.escapeHtml(content);
                     code = `<pre class="hljs"><code>${result}</code></pre>\n`;
                 }
 
-                const live = this.options.live ? this.liveComponent(rawLang, content) : '';
-                return this.options.codeProcess(live, code);
+                const live = this.options.live ? this.liveComponent(lang, content) : '';
+                return this.options.codeProcess.call(this, live, code, content, lang);
             },
         };
 
@@ -118,21 +127,25 @@ class Parser {
     }
 
     liveComponent(lang, content) {
-        const filepath = this.loader.resourcePath;
-        const dirname = path.dirname(filepath);
-        const basename = path.basename(filepath);
+        const filePath = this.loader.resourcePath;
+        const dirname = path.dirname(filePath);
+        // const basename = path.basename(filePath);
 
         let live = '';
         if (lang === 'vue') {
             content += '\n';
 
-            const index = Object.keys(this.components).length;
-            const uniqueName = `c-${hashSum(filepath + '-' + content)}-${index}`;
-            const prefix = basename.replace(/\./g, '-') + '-';
-            const filename = path.join(dirname, prefix + uniqueName + '.vue').replace(/\\/g, '/');
-            this.components[uniqueName] = filename;
-
-            this.createFile(filename, content);
+            // hash 只根据内容判断，如果内容相同，则用同一个文件即可。
+            const hash = hashSum(content);
+            const uniqueName = 'ce-' + hash;
+            // const index = Object.keys(this.components).length;
+            // const uniqueName = `c-${hashSum(filePath + '-' + content)}-${index}`;
+            // const prefix = basename.replace(/\./g, '-') + '-';
+            if (!this.components[uniqueName]) {
+                const filename = path.join(dirname, uniqueName + '.vue').replace(/\\/g, '/');
+                this.components[uniqueName] = filename;
+                this.createFile(filename, content);
+            }
             // inject tag
             live = `<${uniqueName} />`;
         } else if (lang === 'html')
