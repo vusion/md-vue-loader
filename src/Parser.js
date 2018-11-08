@@ -39,7 +39,7 @@ class Parser {
                     const lineCount = content.split('\n').length;
                     return `<u-code-example
     :show-code="${lineCount <= this.options.showCodeLineCount}"
-    :disable-detail="${lang === 'html'}"
+    :show-detail="${lang === 'vue'}"
     file-path="${relativePath}">
     <div>${live}</div>
     <div slot="code">${code}</div>
