@@ -5,6 +5,8 @@ const vfs = require('./virtual');
 const loaderUtils = require('loader-utils');
 const hashSum = require('hash-sum');
 
+const componentsCache = {};
+
 // https://github.com/QingWei-Li/vue-markdown-loader/blob/master/lib/markdown-compiler.js
 // Apply `v-pre` to `<pre>` and `<code>` tags
 const ensureVPre = function (markdown) {
@@ -119,7 +121,8 @@ class Parser {
 
     reset() {
         // this.source = '';
-        this.components = {};
+        // 本文件中的 components
+        this.components = [];
     }
 
     createFile(filename, content) {
@@ -137,15 +140,18 @@ class Parser {
 
             // hash 只根据内容判断，如果内容相同，则用同一个文件即可。
             const hash = hashSum(content);
-            const uniqueName = 'ce-' + hash;
+            // AnonymousCodeExample
+            const uniqueName = `anondemo-${hash}-${content.length}`;
             // const index = Object.keys(this.components).length;
             // const uniqueName = `c-${hashSum(filePath + '-' + content)}-${index}`;
             // const prefix = basename.replace(/\./g, '-') + '-';
-            if (!this.components[uniqueName]) {
+            if (!componentsCache[uniqueName]) {
                 const filename = path.join(dirname, uniqueName + '.vue').replace(/\\/g, '/');
-                this.components[uniqueName] = filename;
+                componentsCache[uniqueName] = filename;
                 this.createFile(filename, content);
             }
+            this.components.push(uniqueName);
+
             // inject tag
             live = `<${uniqueName} />`;
         } else if (lang === 'html')
@@ -159,13 +165,13 @@ class Parser {
 
         let script = '';
 
-        if (Object.keys(this.components).length) {
+        if (this.components.length) {
             let importsString = '';
 
             let componentsString = '{\n';
-            Object.keys(this.components).forEach((key, index) => {
-                importsString += `import Component${index} from ${loaderUtils.stringifyRequest(this.loader, this.components[key])};\n`;
-                componentsString += `'${key}': Component${index},\n`;
+            this.components.forEach((uniqueName, index) => {
+                importsString += `import Component${index} from ${loaderUtils.stringifyRequest(this.loader, componentsCache[uniqueName])};\n`;
+                componentsString += `'${uniqueName}': Component${index},\n`;
             });
             componentsString += '},';
 
