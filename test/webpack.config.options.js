@@ -1,4 +1,5 @@
 const path = require('path');
+const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 module.exports = {
     entry: {
@@ -13,6 +14,12 @@ module.exports = {
         rules: [{
             test: /\.vue$/,
             loader: 'vue-loader',
+        }, {
+            test: /\.css$/,
+            use: [
+                'vue-style-loader',
+                'css-loader',
+            ],
         }, {
             test: /\.md$/,
             use: [{
@@ -39,6 +46,9 @@ module.exports = {
             }],
         }],
     },
+    plugins: [
+        new VueLoaderPlugin(),
+    ],
     devServer: {
         historyApiFallback: true,
     },
