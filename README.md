@@ -13,6 +13,8 @@
 
 Webpack loader for converting Markdown files to alive Vue components.
 
+## Features
+
 - Live vue/html code blocks
 - Use virtual file system to create vue component files
 - Cache same vue component
@@ -239,7 +241,6 @@ preprocess(source) {
 }
 ```
 
-
 ### postprocess
 
 Process after converting.
@@ -259,6 +260,43 @@ postprocess(result) {
 
 - Type: `Function`
 - Default: `null`
+
+## Developing
+
+### test
+
+``` shell
+npm run test
+open test/index.html
+```
+
+### test:options
+
+``` shell
+npm run test:options
+open test/index.html
+```
+
+### test:plugins
+
+``` shell
+npm run test:plugins
+open test/index.html
+```
+
+### test:dev
+
+``` shell
+npm run test:dev
+```
+
+## Changelog
+
+See [Releases](https://github.com/vusion/md-vue-loader/releases)
+
+## Contributing
+
+See [Contributing Guide](https://github.com/vusion/DOCUMENTATION/issues/8)
 
 ## Reference
 
