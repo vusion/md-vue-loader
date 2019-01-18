@@ -26,7 +26,7 @@ node_modules/
 
 # Build Output
 public/
-dist/
+dest/
 
 # Coverage
 lib-cov

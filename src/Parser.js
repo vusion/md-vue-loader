@@ -28,22 +28,16 @@ class Parser {
     constructor(options, loader) {
         options = options || {};
         this.loader = loader;
-        const relativePath = path.relative(process.cwd(), loader.resourcePath).replace(/\\/g, '/').replace(/^(\.\.\/)+/, '');
 
         // default options
         const defaultOptions = {
             live: true,
-            showCodeLineCount: 5,
             codeProcess(live, code, content, lang) {
                 if (live) {
-                    const lineCount = content.split('\n').length;
-                    return `<u-code-example
-    :show-code="${lineCount <= this.options.showCodeLineCount}"
-    :show-detail="${lang === 'vue'}"
-    file-path="${relativePath}">
-    <div>${live}</div>
-    <div slot="code">${code}</div>
-</u-code-example>\n\n`;
+                    return `
+<div>${live}</div>
+<div>${code}</div>
+\n\n`;
                 } else
                     return code;
             },

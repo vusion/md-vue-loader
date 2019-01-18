@@ -1,89 +1,78 @@
-# example
-## test html
+# Cases
 
-```html
-<p>
-    just sample txt
-</p>
+## basic markdown
+
+> **This is bold text** in a blockquote
+
+- [x] Live vue/html code blocks
+- [x] Use virtual file system to create vue component files
+- [x] Cache same vue component
+- [x] Hot reload
+- [x] Built-in **syntax highlighter** with [highlightjs](https://highlightjs.org)
+- [x] Configurable [markdown-it](https://github.com/markdown-it/markdown-it) parser
+
+## html
+
+``` html
+This is a <a>link</a>.
+<p>Just a <strong>html</strong> paragraph.</p>
+<p>A root node is not necessary in <strong>html</strong> code block.</p>
 ```
 
-## test vue
-this line will show the result from vue.
-```vue
+## vue
+
+``` vue
 <template>
-    <p>
-        Test vue. {{a}} font color is red.
-    </p>
+<div>
+    <p>This is a vue component.</p>
+    <button @click="number++">Click me!</button> {{ number }}
+    <p class="vue">Component template should contain exactly one root element.</p>
+</div>
 </template>
+
 <script>
-    export default {
-        data: function () {
-            return  {
-                a: 1,
-            };
-        }
-    }
+export default {
+    data() {
+        return {
+            number: 0,
+        };
+    },
+}
 </script>
-<style>
-p {
+
+<style scoped>
+.vue {
     color: red;
 }
 </style>
 ```
 
-## test vue copy
-this line will show the result from vue.
-```vue
+## vue code copy
+
+Same vue code will only be converted to one component. Make sure their contents are exactly equal.
+
+``` vue
 <template>
-    <p>
-        Test vue. {{a}} font color is green.
-    </p>
+<div>
+    <p>This is a vue component.</p>
+    <button @click="number++">Click me!</button> {{ number }}
+    <p class="vue">Component template should contain exactly one root element.</p>
+</div>
 </template>
+
 <script>
-    export default {
-        data: function () {
-            return  {
-                a: 1,
-            };
-        }
-    }
+export default {
+    data() {
+        return {
+            number: 0,
+        };
+    },
+}
 </script>
+
 <style scoped>
-p {
-    color: green;
+.vue {
+    color: red;
 }
 </style>
-```
-
-## test vue2
-this line will show the result from vue.
-```vue
-<template>
-    <p>
-        Test vue. {{a2}}
-        <button @click="click">click me</button>
-    </p>
-</template>
-<script>
-    export default {
-        data: function () {
-            return  {
-                a2: 1,
-            };
-        },
-        methods: {
-            click() {
-                this.a2++;
-            },
-        },
-    }
-</script>
-```
-
-## test html2
-
-```html
-<p>
-    just sample txt2
-</p>
 ```

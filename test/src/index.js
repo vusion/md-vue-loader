@@ -1,5 +1,6 @@
-import app from './advanced.md';
-// import app2 from './test2.md';
 import Vue from 'vue';
-new Vue(app).$mount('#preview1');
-// new Vue(app2).$mount('#preview2');
+import App from './test.md';
+import CodeExample from './code-example.vue';
+
+Vue.component('code-example', CodeExample);
+new Vue(App).$mount('#app');

@@ -19,6 +19,15 @@ module.exports = {
                 loader: 'vue-loader',
             }, {
                 loader: path.resolve(__dirname, '../index.js'),
+                options: {
+                    wrapper: 'article',
+                    markdown: {
+                        langPrefix: 'lang-',
+                    },
+                    preprocess(source) {
+                        return '**added by preprocess**\n\n------\n\n' + source;
+                    },
+                },
             }],
         }],
     },

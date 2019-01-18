@@ -1,43 +1,14 @@
-<ul class="nav">
-    <li>
-        <label for="preview1b">preview1</label>
-    </li>
-    <li>
-        <label for="preview2b">preview2</label>
-    </li>
-</ul>
-<input type="radio" name="handle" value="1" id="preview1b" style="display:none" checked>
-<pre >
-    <div id="preview1"></div>
-</pre>
-<input type="radio" name="handle" value="2" id="preview2b" style="display:none">
-<pre>
-    <div id="preview2"></div>
-</pre>
-<style>
-    body {
-        width: 800px;
-        margin: 0 auto;
-    }
-    .nav {
-        overflow: hidden;
-    }
-    .nav li{
-        float: left;
-        width: 50%;
-        text-align: center;
-        list-style-type: none; 
-    }
-    [name=handle] + pre {
-        display: none;
-        text-align: center;
-    }
-    [name=handle]:checked + pre {
-        display: block;
-    }
-    * {
-        margin: 0;
-        padding: 0;
-    }
-</style>
-<script src="./dist/build.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>@vusion/md-vue-loader</title>
+    <link rel="stylesheet" href="https://highlightjs.org/static/demo/styles/atom-one-dark.css">
+</head>
+<body>
+    <div id="app"></div>
+    <script src="./dest/bundle.js"></script>
+</body>
+</html>

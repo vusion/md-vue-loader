@@ -13,19 +13,25 @@
 
 Webpack loader for converting Markdown files to alive Vue components.
 
-- Configurable [markdown-it](https://github.com/markdown-it/markdown-it) parser
-- Built-in **syntax highlighter** with [highlightjs](https://highlightjs.org)
 - Live vue/html code blocks
+- Use virtual file system to create vue component files
+- Cache same vue component
 - Hot reload
+- Built-in **syntax highlighter** with [highlightjs](https://highlightjs.org)
+- Configurable [markdown-it](https://github.com/markdown-it/markdown-it) parser
 
 ## Example
 
 Support two kinds of code blocks to live:
 
+1. html code
+
 ``` html
 <u-button>Button</u-button>
 <u-input></u-input>
 ```
+
+2. vue code
 
 ``` vue
 <template>
@@ -75,8 +81,8 @@ module.exports = {
 
 Note that to get code highlighting to work, you need to:
 
-- include one of the highlight.js css files into your project, for example: `highlight.js/styles/github-gist.css`.
-- specify a lang in code block. ref: (creating and highlighting code blocks)[https://help.github.com/articles/creating-and-highlighting-code-blocks/].
+- Include one of the highlight.js css files into your project. For example: [https://highlightjs.org/static/demo/styles/atom-one-dark.css].
+- Specify a lang in code block. Ref: (creating and highlighting code blocks)[https://help.github.com/articles/creating-and-highlighting-code-blocks/].
 
 ### With options
 
@@ -113,24 +119,43 @@ const routes = [
 
 ### live
 
+Enable/Disable live detecting and assembling vue/html code blocks.
+
 - Type: `boolean`
 - Default: `true`
 
-Enable/Disable live detecting and assembling vue/html code blocks.
-
-### liveProcess
+### codeProcess
 
 Process after fetching live components from code blocks
 
 - Type: `Function`
 - Default: `null`
 
+
+- @param {string} live - code of live components
+- @param {string} code - highlighted code of raw content
+- @param {string} content - raw content
+- @param {string} lang - code block lang
+
+
 For example:
 
 ``` javascript
-liveProcess(live, code) {
-  // do anything
-  return `<div>${live}</div>` + '\n\n' + code;
+codeProcess(live, code, content, lang) {
+    // do anything
+    return `<div>${live}</div>` + '\n\n' + code;
+}
+```
+
+For another example, suppose you have a complex container component called `<code-example>`, with some useful slots.
+
+``` javascript
+codeProcess(live, code, content, lang) {
+    // do anything
+    return `<code-example lang="${lang}">
+    <div>${live}</div>
+    <div slot="code">${code}</div>
+</code-example>\n\n`;
 }
 ```
 
@@ -149,21 +174,29 @@ The wrapper of entire markdown content, can be HTML tag name or Vue component na
 - Default:
 ``` js
 {
-    preset: 'default',
     html: true,
-    highlight(str, rawLang) {
-        let lang = rawLang;
-        if (rawLang === 'vue') {
-            lang = 'html';
-        }
-        if (lang && hljs.getLanguage(lang)) {
+    langPrefix: 'lang-',
+    highlight: (content, lang) => {
+        content = content.trim();
+        lang = lang.trim();
+
+        let hlLang = lang;
+        if (lang === 'vue')
+            hlLang = 'html';
+
+        let code = '';
+        if (hlLang && hljs.getLanguage(hlLang)) {
             try {
-                const result = hljs.highlight(lang, str).value;
-                return `<pre class='hljs ${this.langPrefix}${rawLang}'><code>${result}</code></pre>`;
+                const result = hljs.highlight(hlLang, content).value;
+                code = `<pre class="hljs ${markdown.options.langPrefix}${lang}"><code>${result}</code></pre>\n`;
             } catch (e) {}
+        } else {
+            const result = markdown.utils.escapeHtml(content);
+            code = `<pre class="hljs"><code>${result}</code></pre>\n`;
         }
-        const result = markdown.utils.escapeHtml(str);
-        return `<pre class='hljs'><code>${result}</code></pre>`;
+
+        const live = this.options.live ? this.liveComponent(lang, content) : '';
+        return this.options.codeProcess.call(this, live, code, content, lang);
     },
 };
 ```
