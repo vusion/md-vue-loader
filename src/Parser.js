@@ -17,7 +17,7 @@ const ensureVPre = function (markdown) {
             if (rendererRules.hasOwnProperty(rule) && typeof rendererRules[rule] === 'function') {
                 const saved = rendererRules[rule];
                 rendererRules[rule] = function (...args) {
-                    return saved.apply(this, args).replace(/(<pre|<code)/g, '$1 v-pre');
+                    return saved.apply(this, args).replace(/(<pre|<code)(?![^\s])/g, '$1 v-pre');
                 };
             }
         });
@@ -34,10 +34,7 @@ class Parser {
             live: true,
             codeProcess(live, code, content, lang) {
                 if (live) {
-                    return `
-<div>${live}</div>
-<div>${code}</div>
-\n\n`;
+                    return `\n<div>${live}</div>\n${code}\n`;
                 } else
                     return code;
             },

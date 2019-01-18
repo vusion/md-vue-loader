@@ -7,16 +7,19 @@
 
 <script>
 export default {
-    name: 'code-example',
+    name: 'u-code-example',
 };
 </script>
 
 <style scoped>
 .root {
-
+    border: 1px solid #ccc;
+    background: #f2f5f8;
 }
 
-.code {
-
+.live {
+    padding: 15px;
 }
+
+.code {}
 </style>

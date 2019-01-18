@@ -130,8 +130,6 @@ Process after fetching live components from code blocks
 
 - Type: `Function`
 - Default: `null`
-
-
 - @param {string} live - code of live components
 - @param {string} code - highlighted code of raw content
 - @param {string} content - raw content
@@ -230,6 +228,7 @@ Process before converting.
 
 - Type: `Function`
 - Default: `null`
+- @param {string} source - Markdown source content
 
 For example:
 
@@ -247,6 +246,7 @@ Process after converting.
 
 - Type: `Function`
 - Default: `null`
+- @param {string} result - Final converted result
 
 For example:
 

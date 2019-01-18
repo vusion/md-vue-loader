@@ -21,6 +21,14 @@ module.exports = {
                 loader: path.resolve(__dirname, '../index.js'),
                 options: {
                     wrapper: 'article',
+                    codeProcess(live, code, content, lang) {
+                        return `
+<code-example>
+    <div>${live}</div>
+    <div slot="code">${code}</div>
+</code-example>
+\n`;
+                    },
                     markdown: {
                         langPrefix: 'lang-',
                     },
