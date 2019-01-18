@@ -8,12 +8,12 @@ module.exports = {
     output: {
         path: resolve(__dirname, './dist'),
         publicPath: '/dist/',
-        filename: 'build.js'
+        filename: 'build.js',
     },
     plugins: [
         new webpack.LoaderOptionsPlugin({
             options: {
-                __vueMarkdownHTMLOptions__ : {
+                __vueMarkdownHTMLOptions__: {
                     wrapper: 'article',
                     markdown: {
                         langPrefix: 'lang-',
@@ -23,7 +23,7 @@ module.exports = {
                         [iterator, 'link_converter', 'link_open', (tokens, idx) => tokens[idx].tag = 'u-link'],
                         [iterator, 'link_converter', 'link_close', (tokens, idx) => tokens[idx].tag = 'u-link'],
                     ],
-                    preprocess: function (source) {
+                    preprocess(source) {
                         return `
     # added by preprocess
     ${source}
@@ -36,7 +36,7 @@ module.exports = {
     module: {
         rules: [{
             test: /\.vue$/,
-            loader: 'vue-loader'
+            loader: 'vue-loader',
         }, {
             test: /\.md$/,
             use: [{
@@ -48,6 +48,6 @@ module.exports = {
     },
     devServer: {
         historyApiFallback: true,
-        noInfo: true
-    }
+        noInfo: true,
+    },
 };

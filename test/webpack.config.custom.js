@@ -8,12 +8,12 @@ module.exports = {
     output: {
         path: resolve(__dirname, './dist'),
         publicPath: '/dist/',
-        filename: 'build.js'
+        filename: 'build.js',
     },
     module: {
         rules: [{
             test: /\.vue$/,
-            loader: 'vue-loader'
+            loader: 'vue-loader',
         }, {
             test: /\.md$/,
             use: [{
@@ -30,7 +30,7 @@ module.exports = {
                         [iterator, 'link_converter', 'link_open', (tokens, idx) => tokens[idx].tag = 'u-link'],
                         [iterator, 'link_converter', 'link_close', (tokens, idx) => tokens[idx].tag = 'u-link'],
                     ],
-                    preprocess: function (source) {
+                    preprocess(source) {
                         return `
 # added by preprocess
 ${source}
@@ -42,6 +42,6 @@ ${source}
     },
     devServer: {
         historyApiFallback: true,
-        noInfo: true
-    }
+        noInfo: true,
+    },
 };
