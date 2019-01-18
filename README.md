@@ -208,6 +208,14 @@ The wrapper of entire markdown content, can be HTML tag name or Vue component na
 - Type: `Array`
 - Default: `[]`
 
+For example:
+
+``` javascript
+plugins: [
+    require('markdown-it-task-lists'),
+],
+```
+
 ### rules
 
 [markdown-it](https://github.com/markdown-it/markdown-it) renderer rules.

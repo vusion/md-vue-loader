@@ -1,7 +1,10 @@
 {
   "name": "@vusion/md-vue-loader",
-  "version": "0.2.0",
-  "author": "zhangsanshi5566@gmail.com",
+  "version": "1.0.0",
+  "author": "Rainfore <rainforest92@126.com>",
+  "contributors": [
+    "zhangsanshi5566@gmail.com"
+  ],
   "description": "Webpack loader for converting Markdown files to alive Vue components.",
   "scripts": {
     "precommit": "bash node_modules/vusion-hooks/pre-commit",
