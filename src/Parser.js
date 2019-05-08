@@ -54,7 +54,7 @@ class Parser {
                 lang = lang.trim();
 
                 let hlLang = lang;
-                if (lang === 'vue')
+                if (lang === 'vue' || lang === 'htm')
                     hlLang = 'html';
 
                 let code = '';
