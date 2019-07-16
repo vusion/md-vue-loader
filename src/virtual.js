@@ -8,6 +8,61 @@ const path = require('path');
 const NS = __filename;
 
 /**
+ * mock file system stats
+ */
+class Stats {
+    constructor(content) {
+        const createDate = new Date();
+        Object.assign(this, {
+            ino: 48064969,
+            mode: 33188,
+            nlink: 1,
+            uid: 85,
+            gid: 100,
+            rdev: 0,
+            size: content.length,
+            blksize: 4096,
+            blocks: 8,
+            atimeMs: createDate.getTime(),
+            mtimeMs: createDate.getTime(),
+            ctimeMs: createDate.getTime(),
+            birthtimeMs: createDate.getTime(),
+            atime: createDate,
+            mtime: createDate,
+            ctime: createDate,
+            birthtime: createDate,
+        });
+    }
+
+    isFile() {
+        return true;
+    }
+
+    isDirectory() {
+        return false;
+    }
+
+    isBlockDevice() {
+        return false;
+    }
+
+    isCharacterDevice() {
+        return false;
+    }
+
+    isSymbolicLink() {
+        return false;
+    }
+
+    isFIFO() {
+        return false;
+    }
+
+    isSocket() {
+        return false;
+    }
+}
+/**
  * Patch the file system
  */
 function patch(fs) {
@@ -24,6 +79,7 @@ function patch(fs) {
             virtualFS.files[file] = {
                 path: file,
                 content: options.content,
+                stats: new Stats(options.content),
             };
         },
     };
@@ -63,39 +119,7 @@ function patch(fs) {
         const rp = path.resolve(p);
         const vfile = virtualFS.files[rp];
         if (vfile) {
-            const vstat = {
-                dev: 8675309,
-                nlink: 1,
-                uid: 501,
-                gid: 20,
-                rdev: 0,
-                blksize: 4096,
-                ino: 44700000,
-                mode: 33188,
-                size: vfile.content.length,
-                isFile: function isFile() {
-                    return true;
-                },
-                isDirectory: function isDirectory() {
-                    return false;
-                },
-                isBlockDevice: function isBlockDevice() {
-                    return false;
-                },
-                isCharacterDevice: function isCharacterDevice() {
-                    return false;
-                },
-                isSymbolicLink: function isSymbolicLink() {
-                    return false;
-                },
-                isFIFO: function isFIFO() {
-                    return false;
-                },
-                isSocket: function isSocket() {
-                    return false;
-                },
-            };
-            cb(null, vstat);
+            cb(null, vfile.stats);
             return;
         }
         return orig.apply(this, args);
@@ -104,39 +128,7 @@ function patch(fs) {
         const rp = path.resolve(p);
         const vfile = virtualFS.files[rp];
         if (vfile) {
-            const vstat = {
-                dev: 8675309,
-                nlink: 1,
-                uid: 501,
-                gid: 20,
-                rdev: 0,
-                blksize: 4096,
-                ino: 44700000,
-                mode: 33188,
-                size: vfile.content.length,
-                isFile: function isFile() {
-                    return true;
-                },
-                isDirectory: function isDirectory() {
-                    return false;
-                },
-                isBlockDevice: function isBlockDevice() {
-                    return false;
-                },
-                isCharacterDevice: function isCharacterDevice() {
-                    return false;
-                },
-                isSymbolicLink: function isSymbolicLink() {
-                    return false;
-                },
-                isFIFO: function isFIFO() {
-                    return false;
-                },
-                isSocket: function isSocket() {
-                    return false;
-                },
-            };
-            return vstat;
+            return vfile.stats;
         }
         return orig.apply(this, args);
     });

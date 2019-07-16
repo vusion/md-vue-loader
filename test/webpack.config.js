@@ -13,7 +13,11 @@ module.exports = {
     module: {
         rules: [{
             test: /\.vue$/,
-            loader: 'vue-loader',
+            use: [ {
+                loader: 'cache-loader',
+            },{
+                loader: 'vue-loader',
+            }]
         }, {
             test: /\.css$/,
             use: [
@@ -22,8 +26,10 @@ module.exports = {
             ],
         }, {
             test: /\.md$/,
-            use: [{
+            use: [ {
                 loader: 'vue-loader',
+            }, {
+                loader: 'cache-loader',
             }, {
                 loader: path.resolve(__dirname, '../index.js'),
             }],
