@@ -83,8 +83,8 @@ module.exports = {
 
 Note that to get code highlighting to work, you need to:
 
-- Include one of the highlight.js css files into your project. For example: [https://highlightjs.org/static/demo/styles/atom-one-dark.css].
-- Specify a lang in code block. Ref: (creating and highlighting code blocks)[https://help.github.com/articles/creating-and-highlighting-code-blocks/].
+- Include one of the highlight.js css files into your project. For example: (https://highlightjs.org/static/demo/styles/atom-one-dark.css).
+- Specify a lang in code block. Ref: [creating and highlighting code blocks)](https://help.github.com/articles/creating-and-highlighting-code-blocks/).
 
 ### With options
 
@@ -117,22 +117,23 @@ const routes = [
 ]
 ```
 
-### With Vue CLI 3
-In your `vue.config.js` file:
+### Vue CLI 3
+
+Just chain `@vusion/md-vue-loader` with `vue-loader` in your `vue.config.js` file:
 
 ``` js
 module.exports = {
-    chainWebpack: config => {
+    chainWebpack(config) {
         config.module.rule('md')
-        .test(/\.md$/)
-        .use('vue-loader')
-        .loader('vue-loader')
-        .end()
-        .use('@vusion/md-vue-loader')
-        .loader('@vusion/md-vue-loader')
-        .end()
-    }
-}
+            .test(/\.md$/)
+            .use('vue-loader')
+            .loader('vue-loader')
+            .end()
+            .use('@vusion/md-vue-loader')
+            .loader('@vusion/md-vue-loader')
+            .end();
+    },
+};
 ```
 
 ## Options
