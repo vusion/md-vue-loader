@@ -117,6 +117,24 @@ const routes = [
 ]
 ```
 
+### With Vue CLI 3
+In your `vue.config.js` file:
+
+``` js
+module.exports = {
+    chainWebpack: config => {
+        config.module.rule('md')
+        .test(/\.md$/)
+        .use('vue-loader')
+        .loader('vue-loader')
+        .end()
+        .use('@vusion/md-vue-loader')
+        .loader('@vusion/md-vue-loader')
+        .end()
+    }
+}
+```
+
 ## Options
 
 ### live
