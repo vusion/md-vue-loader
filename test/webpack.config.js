@@ -26,11 +26,14 @@ module.exports = {
             ],
         }, {
             test: /\.md$/,
-            use: [ {
-                loader: 'vue-loader',
-            }, {
+            use: [
+            {
                 loader: 'cache-loader',
-            }, {
+            },
+            {
+                loader: 'vue-loader',
+            },
+            {
                 loader: path.resolve(__dirname, '../index.js'),
             }],
         }],
