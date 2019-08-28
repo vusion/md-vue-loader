@@ -1,9 +1,9 @@
 const path = require('path');
 const MarkdownIt = require('markdown-it');
 const hljs = require('highlight.js');
-const vfs = require('./virtual');
 const loaderUtils = require('loader-utils');
 const hashSum = require('hash-sum');
+const VirtualStats = require('./Status');
 
 const componentsCache = {};
 
@@ -28,7 +28,6 @@ class Parser {
     constructor(options, loader) {
         options = options || {};
         this.loader = loader;
-
         // default options
         const defaultOptions = {
             live: true,
@@ -84,7 +83,6 @@ class Parser {
             const langName = info.split(/\s+/g)[0];
             return options.highlight(token.content, langName);
         };
-
         // v-pre must be set
         ensureVPre(markdown);
         // apply rules
@@ -117,7 +115,10 @@ class Parser {
     }
 
     createFile(filename, content) {
-        vfs.createFile(this.loader.fs, filename, content);
+        const fs = this.loader.fs || this.loader._compilation.inputFileSystem;
+        Parser.populateFilesystem({ fs,
+            modulePath: filename,
+            contents: content });
     }
 
     liveComponent(lang, content) {
@@ -190,6 +191,74 @@ class Parser {
         if (this.options.postprocess)
             result = this.options.postprocess.call(this, result);
         return result;
+    }
+
+    static populateFilesystem(options) {
+        const fs = options.fs;
+        const modulePath = options.modulePath;
+        const contents = options.contents;
+        const mapIsAvailable = typeof Map !== 'undefined';
+        const statStorageIsMap = mapIsAvailable && fs._statStorage.data instanceof Map;
+        const readFileStorageIsMap = mapIsAvailable && fs._readFileStorage.data instanceof Map;
+
+        if (readFileStorageIsMap) { // enhanced-resolve@3.4.0 or greater
+            if (fs._readFileStorage.data.has(modulePath)) {
+                return;
+            }
+        } else if (fs._readFileStorage.data[modulePath]) { // enhanced-resolve@3.3.0 or lower
+            return;
+        }
+        const stats = Parser.createStats(options);
+        if (statStorageIsMap) { // enhanced-resolve@3.4.0 or greater
+            fs._statStorage.data.set(modulePath, [null, stats]);
+        } else { // enhanced-resolve@3.3.0 or lower
+            fs._statStorage.data[modulePath] = [null, stats];
+        }
+        if (readFileStorageIsMap) { // enhanced-resolve@3.4.0 or greater
+            fs._readFileStorage.data.set(modulePath, [null, contents]);
+        } else { // enhanced-resolve@3.3.0 or lower
+            fs._readFileStorage.data[modulePath] = [null, contents];
+        }
+    }
+
+    static statsDate(inputDate) {
+        if (!inputDate) {
+            inputDate = new Date();
+        }
+        return inputDate;
+    }
+
+    static createStats(options) {
+        if (!options) {
+            options = {};
+        }
+        if (!options.ctime) {
+            options.ctime = Parser.statsDate();
+        }
+        if (!options.mtime) {
+            options.mtime = Parser.statsDate();
+        }
+        if (!options.size) {
+            options.size = 0;
+        }
+        if (!options.size && options.contents) {
+            options.size = options.contents.length;
+        }
+        return new VirtualStats({
+            dev: 8675309,
+            nlink: 1,
+            uid: 501,
+            gid: 20,
+            rdev: 0,
+            blksize: 4096,
+            ino: 44700000,
+            mode: 33188,
+            size: options.size,
+            atime: options.mtime,
+            mtime: options.mtime,
+            ctime: options.ctime,
+            birthtime: options.ctime,
+        });
     }
 }
 
