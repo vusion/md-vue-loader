@@ -119,6 +119,7 @@ class Parser {
         Parser.populateFilesystem({ fs,
             modulePath: filename,
             contents: content });
+        this.loader.addDependency(filename);
     }
 
     liveComponent(lang, content) {
