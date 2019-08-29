@@ -3,8 +3,13 @@ const MarkdownIt = require('markdown-it');
 const hljs = require('highlight.js');
 const loaderUtils = require('loader-utils');
 const hashSum = require('hash-sum');
-const VirtualStats = require('./Status');
-
+const VirtualModuleWebpack = require('virtual-module-webpack-plugin');
+VirtualModuleWebpack.statsDate = function (inputDate) {
+    if (!inputDate) {
+        inputDate = new Date();
+    }
+    return inputDate;
+};
 const componentsCache = {};
 
 // https://github.com/QingWei-Li/vue-markdown-loader/blob/master/lib/markdown-compiler.js
@@ -116,15 +121,14 @@ class Parser {
 
     createFile(filename, content) {
         const fs = this.loader.fs || this.loader._compilation.inputFileSystem;
-        Parser.populateFilesystem({ fs,
+        VirtualModuleWebpack.populateFilesystem({ fs,
             modulePath: filename,
             contents: content });
-        this.loader.addDependency(filename);
     }
 
     liveComponent(lang, content) {
-        const filePath = this.loader.resourcePath;
-        const dirname = path.dirname(filePath);
+        // const filePath = this.loader.resourcePath;
+        // const dirname = path.dirname(filePath);
         // const basename = path.basename(filePath);
 
         let live = '';
@@ -139,10 +143,14 @@ class Parser {
             // const uniqueName = `c-${hashSum(filePath + '-' + content)}-${index}`;
             // const prefix = basename.replace(/\./g, '-') + '-';
             if (!componentsCache[uniqueName]) {
-                const filename = path.join(dirname, uniqueName + '.vue').replace(/\\/g, '/');
+                const filename = path.join(process.cwd(), 'virtual', uniqueName + '.vue').replace(/\\/g, '/');
                 componentsCache[uniqueName] = filename;
                 this.createFile(filename, content);
+                this.loader.addDependency(filename);
+            } else {
+                this.loader.addDependency(componentsCache[uniqueName]);
             }
+
             this.components.push(uniqueName);
 
             // inject tag
@@ -192,74 +200,6 @@ class Parser {
         if (this.options.postprocess)
             result = this.options.postprocess.call(this, result);
         return result;
-    }
-
-    static populateFilesystem(options) {
-        const fs = options.fs;
-        const modulePath = options.modulePath;
-        const contents = options.contents;
-        const mapIsAvailable = typeof Map !== 'undefined';
-        const statStorageIsMap = mapIsAvailable && fs._statStorage.data instanceof Map;
-        const readFileStorageIsMap = mapIsAvailable && fs._readFileStorage.data instanceof Map;
-
-        if (readFileStorageIsMap) { // enhanced-resolve@3.4.0 or greater
-            if (fs._readFileStorage.data.has(modulePath)) {
-                return;
-            }
-        } else if (fs._readFileStorage.data[modulePath]) { // enhanced-resolve@3.3.0 or lower
-            return;
-        }
-        const stats = Parser.createStats(options);
-        if (statStorageIsMap) { // enhanced-resolve@3.4.0 or greater
-            fs._statStorage.data.set(modulePath, [null, stats]);
-        } else { // enhanced-resolve@3.3.0 or lower
-            fs._statStorage.data[modulePath] = [null, stats];
-        }
-        if (readFileStorageIsMap) { // enhanced-resolve@3.4.0 or greater
-            fs._readFileStorage.data.set(modulePath, [null, contents]);
-        } else { // enhanced-resolve@3.3.0 or lower
-            fs._readFileStorage.data[modulePath] = [null, contents];
-        }
-    }
-
-    static statsDate(inputDate) {
-        if (!inputDate) {
-            inputDate = new Date();
-        }
-        return inputDate;
-    }
-
-    static createStats(options) {
-        if (!options) {
-            options = {};
-        }
-        if (!options.ctime) {
-            options.ctime = Parser.statsDate();
-        }
-        if (!options.mtime) {
-            options.mtime = Parser.statsDate();
-        }
-        if (!options.size) {
-            options.size = 0;
-        }
-        if (!options.size && options.contents) {
-            options.size = options.contents.length;
-        }
-        return new VirtualStats({
-            dev: 8675309,
-            nlink: 1,
-            uid: 501,
-            gid: 20,
-            rdev: 0,
-            blksize: 4096,
-            ino: 44700000,
-            mode: 33188,
-            size: options.size,
-            atime: options.mtime,
-            mtime: options.mtime,
-            ctime: options.ctime,
-            birthtime: options.ctime,
-        });
     }
 }
 
