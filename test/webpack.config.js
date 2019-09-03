@@ -13,11 +13,11 @@ module.exports = {
     module: {
         rules: [{
             test: /\.vue$/,
-            use: [ {
+            use: [{
                 loader: 'cache-loader',
-            },{
+            }, {
                 loader: 'vue-loader',
-            }]
+            }],
         }, {
             test: /\.css$/,
             use: [
@@ -27,15 +27,16 @@ module.exports = {
         }, {
             test: /\.md$/,
             use: [
-            {
-                loader: 'cache-loader',
-            },
-            {
-                loader: 'vue-loader',
-            },
-            {
-                loader: path.resolve(__dirname, '../index.js'),
-            }],
+                {
+                    loader: 'cache-loader',
+                },
+                {
+                    loader: 'vue-loader',
+                },
+                {
+                    loader: path.resolve(__dirname, '../index.js'),
+                },
+            ],
         }],
     },
     plugins: [

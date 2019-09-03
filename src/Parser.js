@@ -10,6 +10,7 @@ VirtualModuleWebpack.statsDate = function (inputDate) {
     }
     return inputDate;
 };
+
 const componentsCache = {};
 
 // https://github.com/QingWei-Li/vue-markdown-loader/blob/master/lib/markdown-compiler.js
@@ -119,16 +120,18 @@ class Parser {
         this.components = [];
     }
 
-    createFile(filename, content) {
+    createFile(filename, contents) {
         const fs = this.loader.fs || this.loader._compilation.inputFileSystem;
-        VirtualModuleWebpack.populateFilesystem({ fs,
+        VirtualModuleWebpack.populateFilesystem({
+            fs,
             modulePath: filename,
-            contents: content });
+            contents,
+        });
     }
 
     liveComponent(lang, content) {
-        // const filePath = this.loader.resourcePath;
-        // const dirname = path.dirname(filePath);
+        const filePath = this.loader.resourcePath;
+        const dirname = path.dirname(filePath);
         // const basename = path.basename(filePath);
 
         let live = '';
@@ -143,14 +146,11 @@ class Parser {
             // const uniqueName = `c-${hashSum(filePath + '-' + content)}-${index}`;
             // const prefix = basename.replace(/\./g, '-') + '-';
             if (!componentsCache[uniqueName]) {
-                const filename = path.join(process.cwd(), 'virtual', uniqueName + '.vue').replace(/\\/g, '/');
+                const filename = path.join(dirname, uniqueName + '.vue').replace(/\\/g, '/');
                 componentsCache[uniqueName] = filename;
                 this.createFile(filename, content);
                 this.loader.addDependency(filename);
-            } else {
-                this.loader.addDependency(componentsCache[uniqueName]);
             }
-
             this.components.push(uniqueName);
 
             // inject tag

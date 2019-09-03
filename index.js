@@ -1,5 +1,5 @@
 const loaderUtils = require('loader-utils');
-const Parser = require('./src/Parser_WebpackFS');
+const Parser = require('./src/Parser');
 
 module.exports = function (source) {
     this.cacheable && this.cacheable();
