@@ -7,7 +7,6 @@
   ],
   "description": "Webpack loader for converting Markdown files to alive Vue components.",
   "scripts": {
-    "precommit": "bash node_modules/vusion-hooks/pre-commit",
     "test": "webpack-cli --config test/webpack.config.js",
     "test:dev": "webpack-dev-server --content-base test/ --config test/webpack.config.js --open",
     "test:options": "webpack-cli --config test/webpack.config.options.js",
@@ -35,14 +34,16 @@
     "hash-sum": "^1.0.2",
     "highlight.js": "^9.12.0",
     "loader-utils": "^1.1.0",
-    "markdown-it": "^8.4.0",
+    "markdown-it": "^9.1.0",
     "virtual-module-webpack-plugin": "^0.4.1"
   },
   "devDependencies": {
+    "husky": "^3.0.4",
+    "vusion-hooks": "^0.3.0",
     "cache-loader": "^4.0.1",
     "css-loader": "^0.28.11",
     "eslint": "^5.12.0",
-    "eslint-config-vusion": "^3.0.1",
+    "eslint-config-vusion": "^3.0.2",
     "markdown-it-for-inline": "^0.1.1",
     "markdown-it-task-lists": "^2.1.1",
     "raw-loader": "^0.5.1",
@@ -53,5 +54,10 @@
     "webpack": "^4.28.4",
     "webpack-cli": "^3.2.1",
     "webpack-dev-server": "^3.1.14"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "node node_modules/vusion-hooks/pre-commit"
+    }
   }
 }
