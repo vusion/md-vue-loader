@@ -150,7 +150,8 @@ class Parser {
                 componentsCache[uniqueName] = filename;
                 this.createFile(filename, content);
                 this.loader.addDependency(filename);
-            }
+            } else
+                this.loader.addDependency(componentsCache[uniqueName]);
             this.components.push(uniqueName);
 
             // inject tag
