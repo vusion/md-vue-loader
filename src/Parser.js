@@ -11,8 +11,6 @@ VirtualModuleWebpack.statsDate = function (inputDate) {
     return inputDate;
 };
 
-const componentsCache = {};
-
 // https://github.com/QingWei-Li/vue-markdown-loader/blob/master/lib/markdown-compiler.js
 // Apply `v-pre` to `<pre>` and `<code>` tags
 const ensureVPre = function (markdown) {
@@ -130,10 +128,8 @@ class Parser {
     }
 
     liveComponent(lang, content) {
-        // const filePath = this.loader.resourcePath;
-        // const dirname = path.dirname(filePath);
-        // const basename = path.basename(filePath);
-
+        const filePath = this.loader.resourcePath;
+        const dirname = path.dirname(filePath);
         let live = '';
         if (lang === 'vue') {
             content += '\n';
@@ -141,29 +137,30 @@ class Parser {
             // hash 只根据内容判断，如果内容相同，则用同一个文件即可。
             const hash = hashSum(content);
             // AnonymousCodeExample
+
             const uniqueName = `anondemo-${hash}-${content.length}`;
+            const filename = path.join(dirname, uniqueName + '.vue');
             // const index = Object.keys(this.components).length;
             // const uniqueName = `c-${hashSum(filePath + '-' + content)}-${index}`;
             // const prefix = basename.replace(/\./g, '-') + '-';
-            if (!componentsCache[uniqueName]) {
-                // const filename = path.join(dirname, uniqueName + '.vue');
-                const filename = path.join(process.cwd(), '.cache/@vusion/md-vue-loader', uniqueName + '.vue');
-                componentsCache[uniqueName] = filename;
-                this.createFile(filename, content);
-                this.loader.addDependency(filename);
-            } else
-                this.loader.addDependency(componentsCache[uniqueName]);
+            this.createFile(filename, content);
+            this.loader.addDependency(filename);
+
             this.components.push(uniqueName);
 
             // inject tag
             live = `<${uniqueName} />`;
-        } else if (lang === 'html')
+        } else if (lang === 'html') {
             live = content;
+        }
 
         return live;
     }
 
     renderVue(html) {
+        const filePath = this.loader.resourcePath;
+        const dirname = path.dirname(filePath);
+
         html = `<template><${this.options.wrapper}>${html}</${this.options.wrapper}></template>\n`;
 
         let script = '';
@@ -173,7 +170,8 @@ class Parser {
 
             let componentsString = '{\n';
             this.components.forEach((uniqueName, index) => {
-                importsString += `import Component${index} from ${loaderUtils.stringifyRequest(this.loader, componentsCache[uniqueName])};\n`;
+                const filename = path.join(dirname, uniqueName + '.vue');
+                importsString += `import Component${index} from ${loaderUtils.stringifyRequest(this.loader, filename)};\n`;
                 componentsString += `'${uniqueName}': Component${index},\n`;
             });
             componentsString += '},';
