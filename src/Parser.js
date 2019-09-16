@@ -147,7 +147,7 @@ class Parser {
             // const prefix = basename.replace(/\./g, '-') + '-';
             if (!componentsCache[uniqueName]) {
                 // const filename = path.join(dirname, uniqueName + '.vue');
-                const filename = path.join(process.cwd(), 'virtual', uniqueName + '.vue');
+                const filename = path.join(process.cwd(), '.cache/@vusion/md-vue-loader', uniqueName + '.vue');
                 componentsCache[uniqueName] = filename;
                 this.createFile(filename, content);
                 this.loader.addDependency(filename);
