@@ -130,8 +130,8 @@ class Parser {
     }
 
     liveComponent(lang, content) {
-        const filePath = this.loader.resourcePath;
-        const dirname = path.dirname(filePath);
+        // const filePath = this.loader.resourcePath;
+        // const dirname = path.dirname(filePath);
         // const basename = path.basename(filePath);
 
         let live = '';
@@ -146,7 +146,8 @@ class Parser {
             // const uniqueName = `c-${hashSum(filePath + '-' + content)}-${index}`;
             // const prefix = basename.replace(/\./g, '-') + '-';
             if (!componentsCache[uniqueName]) {
-                const filename = path.join(dirname, uniqueName + '.vue');
+                // const filename = path.join(dirname, uniqueName + '.vue');
+                const filename = path.join(process.cwd(), 'virtual', uniqueName + '.vue');
                 componentsCache[uniqueName] = filename;
                 this.createFile(filename, content);
                 this.loader.addDependency(filename);
