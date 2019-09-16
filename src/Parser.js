@@ -60,6 +60,7 @@ class Parser {
                 if (lang === 'vue' || lang === 'htm')
                     hlLang = 'html';
 
+                /* eslint-disable no-use-before-define */
                 let code = '';
                 if (hlLang && hljs.getLanguage(hlLang)) {
                     try {
@@ -118,18 +119,25 @@ class Parser {
         this.components = [];
     }
 
-    createFile(filename, contents) {
+    createFile(filePath, contents) {
         const fs = this.loader.fs || this.loader._compilation.inputFileSystem;
         VirtualModuleWebpack.populateFilesystem({
             fs,
-            modulePath: filename,
+            modulePath: filePath,
             contents,
         });
+    }
+
+    fileExists(filePath) {
+        return false;
+        // const fs = this.loader.fs || this.loader._compilation.inputFileSystem;
+        // return fs.existsSync(filePath);
     }
 
     liveComponent(lang, content) {
         const filePath = this.loader.resourcePath;
         const dirname = path.dirname(filePath);
+
         let live = '';
         if (lang === 'vue') {
             content += '\n';
@@ -138,29 +146,24 @@ class Parser {
             const hash = hashSum(content);
             // AnonymousCodeExample
 
-            const uniqueName = `anondemo-${hash}-${content.length}`;
-            const filename = path.join(dirname, uniqueName + '.vue');
-            // const index = Object.keys(this.components).length;
-            // const uniqueName = `c-${hashSum(filePath + '-' + content)}-${index}`;
-            // const prefix = basename.replace(/\./g, '-') + '-';
-            this.createFile(filename, content);
-            this.loader.addDependency(filename);
+            const uniqueName = `anondemo-${hash}`;
+            const fullPath = path.join(dirname, uniqueName + '.vue');
+            if (!this.fileExists(fullPath)) {
+                this.createFile(fullPath, content);
+                this.loader.addDependency(fullPath);
+            }
 
-            this.components.push(uniqueName);
+            this.components.push({ uniqueName, fullPath });
 
             // inject tag
             live = `<${uniqueName} />`;
-        } else if (lang === 'html') {
+        } else if (lang === 'html')
             live = content;
-        }
 
         return live;
     }
 
     renderVue(html) {
-        const filePath = this.loader.resourcePath;
-        const dirname = path.dirname(filePath);
-
         html = `<template><${this.options.wrapper}>${html}</${this.options.wrapper}></template>\n`;
 
         let script = '';
@@ -169,10 +172,9 @@ class Parser {
             let importsString = '';
 
             let componentsString = '{\n';
-            this.components.forEach((uniqueName, index) => {
-                const filename = path.join(dirname, uniqueName + '.vue');
-                importsString += `import Component${index} from ${loaderUtils.stringifyRequest(this.loader, filename)};\n`;
-                componentsString += `'${uniqueName}': Component${index},\n`;
+            this.components.forEach((component, index) => {
+                importsString += `import Component${index} from ${loaderUtils.stringifyRequest(this.loader, component.fullPath)};\n`;
+                componentsString += `'${component.uniqueName}': Component${index},\n`;
             });
             componentsString += '},';
 
