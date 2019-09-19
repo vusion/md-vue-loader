@@ -129,9 +129,8 @@ class Parser {
     }
 
     fileExists(filePath) {
-        return false;
-        // const fs = this.loader.fs || this.loader._compilation.inputFileSystem;
-        // return fs.existsSync(filePath);
+        const fs = this.loader.fs || this.loader._compilation.inputFileSystem;
+        return fs._readFileStorage.data.has ? fs._readFileStorage.data.has(filePath) : fs._readFileStorage.data[filePath];
     }
 
     liveComponent(lang, content) {
