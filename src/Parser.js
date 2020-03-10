@@ -35,9 +35,9 @@ class Parser {
         // default options
         const defaultOptions = {
             live: true,
-            codeProcess(live, code, content, lang) {
+            codeProcess(live, code, content, lang, modifier) {
                 if (live) {
-                    return `\n<div>${live}</div>\n${code}\n`;
+                    return `\n<div${modifier ? ' style="' + modifier + '"' : ''}>${live}</div>\n${code}\n`;
                 } else
                     return code;
             },
@@ -52,7 +52,7 @@ class Parser {
         const defaultMarkdownOptions = {
             html: true,
             langPrefix: 'lang-',
-            highlight: (content, lang) => {
+            highlight: (content, lang, modifier) => {
                 content = content.trim();
                 lang = lang.trim();
 
@@ -73,7 +73,7 @@ class Parser {
                 }
 
                 const live = this.options.live ? this.liveComponent(lang, content) : '';
-                return this.options.codeProcess.call(this, live, code, content, lang);
+                return this.options.codeProcess.call(this, live, code, content, lang, modifier);
             },
         };
 
@@ -85,8 +85,17 @@ class Parser {
         markdown.renderer.rules.fence = function (tokens, idx, options) {
             const token = tokens[idx];
             const info = token.info ? markdown.utils.unescapeAll(token.info).trim() : '';
-            const langName = info.split(/\s+/g)[0];
-            return options.highlight(token.content, langName);
+            const cap = info.match(/\s+/);
+
+            let langName = '';
+            let modifier = '';
+            if (!cap)
+                langName = info;
+            else {
+                langName = info.slice(0, cap.index);
+                modifier = info.slice(cap.index + cap[0].length).replace(/^\{|\}$/g, '');
+            }
+            return options.highlight(token.content, langName, modifier);
         };
         // v-pre must be set
         ensureVPre(markdown);

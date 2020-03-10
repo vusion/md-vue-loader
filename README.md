@@ -20,9 +20,12 @@ Webpack loader for converting Markdown files to alive Vue components.
 - Cache same vue component
 - Hot reload
 - Built-in **syntax highlighter** with [highlightjs](https://highlightjs.org)
+- Code block style modifier
 - Configurable [markdown-it](https://github.com/markdown-it/markdown-it) parser
 
 ## Example
+
+### Live Code Blocks
 
 Support two kinds of code blocks to live:
 
@@ -59,6 +62,15 @@ export default {
 </style>
 ```
 
+### Style Modifier
+
+You can attach more styles enclosed in braces after code block lang. For example: `html {width: 30%}`.
+
+``` html {width: 30%}
+<u-button>Button</u-button>
+<u-textarea></u-textarea>
+```
+
 ## Install
 
 ``` bash
@@ -86,7 +98,7 @@ Note that to get code highlighting to work, you need to:
 - Include one of the highlight.js css files into your project. For example: (https://highlightjs.org/static/demo/styles/atom-one-dark.css).
 - Specify a lang in code block. Ref: [creating and highlighting code blocks)](https://help.github.com/articles/creating-and-highlighting-code-blocks/).
 
-### With options
+### With Options
 
 ``` js
 module.exports = {
@@ -155,24 +167,24 @@ Process after fetching live components from code blocks
 - @param {string} code - highlighted code of raw content
 - @param {string} content - raw content
 - @param {string} lang - code block lang
-
+- @param {string} modifier - string enclosed in braces after lang. Used to modify style by defaults. Actually, You can do whatever you want, but take care about XSS.
 
 For example:
 
 ``` javascript
-codeProcess(live, code, content, lang) {
+codeProcess(live, code, content, lang, modifier) {
     // do anything
-    return `<div>${live}</div>` + '\n\n' + code;
+    return `<div${modifier ? ' style="' + modifier + '"' : ''}>${live}</div>` + '\n\n' + code;
 }
 ```
 
 For another example, suppose you have a complex container component called `<code-example>`, with some useful slots.
 
 ``` javascript
-codeProcess(live, code, content, lang) {
+codeProcess(live, code, content, lang, modifier) {
     // do anything
     return `<code-example lang="${lang}">
-    <div>${live}</div>
+    <div${modifier ? ' style="' + modifier + '"' : ''}>${live}</div>
     <div slot="code">${code}</div>
 </code-example>\n\n`;
 }
@@ -195,7 +207,7 @@ The wrapper of entire markdown content, can be HTML tag name or Vue component na
 {
     html: true,
     langPrefix: 'lang-',
-    highlight: (content, lang) => {
+    highlight: (content, lang, modifier) => {
         content = content.trim();
         lang = lang.trim();
 
@@ -215,7 +227,7 @@ The wrapper of entire markdown content, can be HTML tag name or Vue component na
         }
 
         const live = this.options.live ? this.liveComponent(lang, content) : '';
-        return this.options.codeProcess.call(this, live, code, content, lang);
+        return this.options.codeProcess.call(this, live, code, content, lang, modifier);
     },
 };
 ```
