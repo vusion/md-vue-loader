@@ -28,9 +28,6 @@ module.exports = {
             test: /\.md$/,
             use: [
                 {
-                    loader: 'cache-loader',
-                },
-                {
                     loader: 'vue-loader',
                 },
                 {

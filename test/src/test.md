@@ -34,7 +34,7 @@ This is a <a>link</a>.
 export default {
     data() {
         return {
-            number: 0,
+            number: 13333112,
         };
     },
 }

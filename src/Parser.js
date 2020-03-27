@@ -11,6 +11,7 @@ VirtualModuleWebpack.statsDate = function (inputDate) {
     return inputDate;
 };
 
+const cache = {};
 // https://github.com/QingWei-Li/vue-markdown-loader/blob/master/lib/markdown-compiler.js
 // Apply `v-pre` to `<pre>` and `<code>` tags
 const ensureVPre = function (markdown) {
@@ -130,6 +131,7 @@ class Parser {
 
     createFile(filePath, contents) {
         const fs = this.loader.fs || this.loader._compilation.inputFileSystem;
+
         VirtualModuleWebpack.populateFilesystem({
             fs,
             modulePath: filePath,
@@ -155,13 +157,14 @@ class Parser {
             // AnonymousCodeExample
 
             const uniqueName = `anondemo-${hash}`;
-            const fullPath = path.join(dirname, uniqueName + '.vue');
-            if (!this.fileExists(fullPath)) {
-                this.createFile(fullPath, content);
-                this.loader.addDependency(fullPath);
-            }
+            // const fullPath = path.join(dirname, uniqueName + '.vue');
+            // 改变策略 -> 不输出虚拟文件
+            // if (!this.fileExists(fullPath)) {
+            //     this.createFile(fullPath, content);
+            //     this.loader.addDependency(fullPath);
+            // }
 
-            this.components.push({ uniqueName, fullPath });
+            this.components.push({ uniqueName, content });
 
             // inject tag
             live = `<${uniqueName} />`;
@@ -181,7 +184,9 @@ class Parser {
 
             let componentsString = '{\n';
             this.components.forEach((component, index) => {
-                importsString += `import Component${index} from ${loaderUtils.stringifyRequest(this.loader, component.fullPath)};\n`;
+                importsString += `
+import Component${index} from "${this.loader.resourcePath}?part=script&comp=${component.uniqueName}";\n`;
+
                 componentsString += `'${component.uniqueName}': Component${index},\n`;
             });
             componentsString += '},';
@@ -209,7 +214,10 @@ class Parser {
 
         if (this.options.postprocess)
             result = this.options.postprocess.call(this, result);
-        return result;
+        return {
+            main: result,
+            component: (name) => this.components.find((c) => c.uniqueName === name).content,
+        };
     }
 }
 
