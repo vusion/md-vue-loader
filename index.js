@@ -1,45 +1,27 @@
 const path = require('path');
-const hash = require('hash-sum');
-const qs = require('querystring');
-const MarkdownIt = require('markdown-it');
 const loaderUtils = require('loader-utils');
 const parse = require('./src/parse');
+
 module.exports = function (source) {
+    // eslint-disable-next-line consistent-this
     const loaderContext = this;
-    const stringifyRequest = (r) => loaderUtils.stringifyRequest(loaderContext, r);
 
-    const {
-        target,
-        request,
-        minimize,
-        sourceMap,
-        rootContext,
-        resourcePath,
-        resourceQuery,
-    } = loaderContext;
+    const query = this.resourceQuery ? loaderUtils.parseQuery(this.resourceQuery) : undefined;
+    const options = Object.assign({}, loaderUtils.getOptions(this), query);
+    delete options.component;
 
-    const rawQuery = resourceQuery.slice(1);
-    const inheritQuery = `&${rawQuery}`;
-    const incomingQuery = qs.parse(rawQuery);
-
-    const options = loaderUtils.getOptions(loaderContext) || {};
-    const isProduction = options.productionMode || minimize || process.env.NODE_ENV === 'production';
-
-    const filename = path.basename(resourcePath);
-    const context = rootContext || process.cwd();
-    const sourceRoot = path.dirname(path.relative(context, resourcePath));
+    const filename = path.basename(this.resourcePath);
 
     const descriptor = parse({
         source,
         filename,
-        compilerParseOptions: options,
-        compilerParseQuery: incomingQuery,
+        options,
+        query,
         loaderContext,
     });
 
-    if (incomingQuery.part) {
-        return descriptor.component(incomingQuery.comp);
-    }
-
-    return descriptor.main;
+    if (query.component)
+        return descriptor.componentMap.get(query.component);
+    else
+        return descriptor.main;
 };

@@ -35,9 +35,7 @@
     "highlight.js": "^9.12.0",
     "loader-utils": "^1.1.0",
     "lru-cache": "^5.1.1",
-    "markdown-it": "^9.1.0",
-    "querystring": "^0.2.0",
-    "virtual-module-webpack-plugin": "^0.4.1"
+    "markdown-it": "^9.1.0"
   },
   "devDependencies": {
     "husky": "^3.0.4",

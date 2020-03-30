@@ -1,17 +1,8 @@
 const path = require('path');
 const MarkdownIt = require('markdown-it');
 const hljs = require('highlight.js');
-const loaderUtils = require('loader-utils');
 const hashSum = require('hash-sum');
-const VirtualModuleWebpack = require('virtual-module-webpack-plugin');
-VirtualModuleWebpack.statsDate = function (inputDate) {
-    if (!inputDate) {
-        inputDate = new Date();
-    }
-    return inputDate;
-};
 
-const cache = {};
 // https://github.com/QingWei-Li/vue-markdown-loader/blob/master/lib/markdown-compiler.js
 // Apply `v-pre` to `<pre>` and `<code>` tags
 const ensureVPre = function (markdown) {
@@ -127,16 +118,7 @@ class Parser {
         // this.source = '';
         // 本文件中的 components
         this.components = [];
-    }
-
-    createFile(filePath, contents) {
-        const fs = this.loader.fs || this.loader._compilation.inputFileSystem;
-
-        VirtualModuleWebpack.populateFilesystem({
-            fs,
-            modulePath: filePath,
-            contents,
-        });
+        this.componentMap = new Map();
     }
 
     fileExists(filePath) {
@@ -155,16 +137,9 @@ class Parser {
             // hash 只根据内容判断，如果内容相同，则用同一个文件即可。
             const hash = hashSum(content);
             // AnonymousCodeExample
-
             const uniqueName = `anondemo-${hash}`;
-            // const fullPath = path.join(dirname, uniqueName + '.vue');
-            // 改变策略 -> 不输出虚拟文件
-            // if (!this.fileExists(fullPath)) {
-            //     this.createFile(fullPath, content);
-            //     this.loader.addDependency(fullPath);
-            // }
-
             this.components.push({ uniqueName, content });
+            this.componentMap.set(uniqueName, content);
 
             // inject tag
             live = `<${uniqueName} />`;
@@ -184,8 +159,7 @@ class Parser {
 
             let componentsString = '{\n';
             this.components.forEach((component, index) => {
-                importsString += `
-import Component${index} from "${this.loader.resourcePath}?part=script&comp=${component.uniqueName}";\n`;
+                importsString += `import Component${index} from "${this.loader.resourcePath}?component=${component.uniqueName}";\n`;
 
                 componentsString += `'${component.uniqueName}': Component${index},\n`;
             });
@@ -214,9 +188,11 @@ import Component${index} from "${this.loader.resourcePath}?part=script&comp=${co
 
         if (this.options.postprocess)
             result = this.options.postprocess.call(this, result);
+
         return {
             main: result,
-            component: (name) => this.components.find((c) => c.uniqueName === name).content,
+            components: this.components,
+            componentMap: this.componentMap,
         };
     }
 }

@@ -2,24 +2,23 @@ const hash = require('hash-sum');
 const cache = new (require('lru-cache'))(100);
 const Parser = require('./Parser');
 
-module.exports = function parse(options) {
+module.exports = function parse(params) {
     const {
         source,
         filename = '',
-        compilerParseOptions = {},
-        compilerParseQuery = {},
+        options = {},
+        query = {},
         loaderContext,
-    } = options;
-    const cacheKey = hash(
-        filename + source + JSON.stringify(compilerParseOptions)
-    );
-    console.log(cacheKey);
+    } = params;
+
+    const cacheKey = hash(filename + source + JSON.stringify(options));
     let output = cache.get(cacheKey);
     if (output)
         return output;
-    // 编译 markdown
-    const compiler = new Parser(Object.assign({}, compilerParseOptions, compilerParseQuery), loaderContext);
-    output = compiler.parse(source);
+
+    // 解析 Markdown
+    const parser = new Parser(Object.assign({}, options, query), loaderContext);
+    output = parser.parse(source);
     cache.set(cacheKey, output);
     return output;
 };
