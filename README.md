@@ -16,8 +16,7 @@ Webpack loader for converting Markdown files to alive Vue components.
 ## Features
 
 - Live vue/html code blocks
-- Use virtual file system to create vue component files
-- Cache same vue component
+- Cache markdown component and code block components
 - Hot reload
 - Built-in **syntax highlighter** with [highlightjs](https://highlightjs.org)
 - Code block style modifier
@@ -341,8 +340,6 @@ See [Contributing Guide](https://github.com/vusion/DOCUMENTATION/issues/8)
 
 - [vue-markdown-loader](https://github.com/QingWei-Li/vue-markdown-loader)
 - [vue-md-loader](https://github.com/wxsms/vue-md-loader)
-- [virtual-file-loader](https://github.com/renanhangai/virtual-file-loader)
-- [https://github.com/webpack/webpack/issues/5824](https://github.com/webpack/webpack/issues/5824)
 
 ## License
 
