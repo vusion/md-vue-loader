@@ -7,8 +7,7 @@ module.exports = function (source) {
     const loaderContext = this;
 
     const query = this.resourceQuery ? loaderUtils.parseQuery(this.resourceQuery) : undefined;
-    const options = Object.assign({}, loaderUtils.getOptions(this), query);
-    delete options.component;
+    const options = loaderUtils.getOptions(this) || {};
 
     const filename = path.basename(this.resourcePath);
 
@@ -20,7 +19,7 @@ module.exports = function (source) {
         loaderContext,
     });
 
-    if (query.component)
+    if (query && query.component)
         return descriptor.componentMap.get(query.component);
     else
         return descriptor.main;

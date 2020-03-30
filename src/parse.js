@@ -7,7 +7,7 @@ module.exports = function parse(params) {
         source,
         filename = '',
         options = {},
-        query = {},
+        query,
         loaderContext,
     } = params;
 
